@@ -3,13 +3,13 @@ options:
 
 pipelines:
   branches:
-    Test-Pieline:
-      step:
-        name: Build and Test
-        script:
-          - echo "Hello Build and Test for the Backend"
-          - npm install
-          - sleep 5
-          - ./vendor/bin/sail up
-          - sleep 5
-          - ./vendor/bin/phpunit
+    Test-Pipeline:
+      - step:
+          name: Build and Test
+          script:
+            - echo "Hello Build and Test for the Backend"
+            - npm install
+            - ./vendor/bin/sail up -d # Start services in detached mode
+            - ./vendor/bin/sail exec app bash -c 'until nc -z localhost 80; do sleep 1; done' # Wait until service is ready
+            - ./vendor/bin/phpunit # Run tests
+            - ./vendor/bin/sail down # Stop and remove containers
