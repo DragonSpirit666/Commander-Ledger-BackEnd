@@ -5,23 +5,22 @@ pipelines:
   branches:
     Test-Pipeline:
       - step:
-          name: Build and Test
+          name: Install Dependencies
           script:
-            - echo "Setting up environment for Build and Test for the Backend"
-            # Copy .env.example to .env
+            - echo "Installing dependencies"
             - cp .env.example .env
-            # Install dependencies in the vendor folder
             - docker run --rm \
               -u "$(id -u):$(id -g)" \
               -v "$(pwd):/var/www/html" \
               -w /var/www/html \
               laravelsail/php83-composer:latest \
               composer install --ignore-platform-reqs
-            # Start Sail services in detached mode
+
+      - step:
+          name: Build and Test
+          script:
+            - echo "Starting Build and Test for the Backend"
             - ./vendor/bin/sail up -d
-            # Wait until the app is ready
             - ./vendor/bin/sail exec app bash -c 'until nc -z localhost 80; do sleep 1; done'
-            # Run tests
             - ./vendor/bin/phpunit
-            # Stop and remove containers
             - ./vendor/bin/sail down
