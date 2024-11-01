@@ -1,0 +1,15 @@
+options:
+  docker: true
+
+pipelines:
+  branches:
+    Test-Pieline:
+      step:
+        name: Build and Test
+        script:
+          - echo "Hello Build and Test for the Backend"
+          - npm install
+          - sleep 5
+          - ./vendor/bin/sail up
+          - sleep 5
+          - ./vendor/bin/phpunit
