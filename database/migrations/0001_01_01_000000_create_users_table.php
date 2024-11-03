@@ -17,6 +17,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('photo');
+            $table->boolean('prive');
+            $table->integer('nb_parties_gagnees')->default(0);
+            $table->integer('nb_parties_perdues')->default(0);
+            $table->decimal('prix_total_decks', 10, 2)->default(0.00);
             $table->rememberToken();
             $table->timestamps();
         });

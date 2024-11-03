@@ -33,12 +33,22 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'photo' => ['nullable', 'string', 'max:255'],
+            'prive' => ['nullable', 'boolean'],
+            'nb_parties_gagnees' => ['nullable', 'integer'],
+            'nb_parties_perdues' => ['nullable', 'integer'],
+            'prix_total_decks' => ['nullable', 'numeric'],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'photo' => $request->photo,
+            'prive' => $request->prive,
+            'nb_parties_gagnees' => $request->nb_parties_gagnees,
+            'nb_parties_perdues' => $request->nb_parties_perdues,
+            'prix_total_decks' => $request->prix_total_decks,
         ]);
 
         event(new Registered($user));

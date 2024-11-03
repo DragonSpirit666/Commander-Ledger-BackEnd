@@ -21,6 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'photo',
+        'prive',
+        'nb_parties_gagnees',
+        'nb_parties_perdues',
+        'prix_total_decks'
     ];
 
     /**
@@ -43,6 +48,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'prive' => 'boolean',
+            'nb_parties_gagnees' => 'integer',
+            'nb_parties_perdues' => 'integer',
+            'prix_total_decks' => 'decimal:2',
         ];
     }
 }
