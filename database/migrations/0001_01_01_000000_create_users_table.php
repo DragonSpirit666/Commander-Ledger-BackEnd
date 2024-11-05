@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('utilisateurs', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->string('photo');
-            $table->boolean('prive');
+            $table->string('nom');
+            $table->string('couriel')->unique();
+            $table->timestamp('couriel_verifier_a')->nullable();
+            $table->string('mot_de_passe');
+            $table->binary('photo')->nullable();
+            $table->boolean('prive')->default(false);
             $table->integer('nb_parties_gagnees')->default(0);
             $table->integer('nb_parties_perdues')->default(0);
             $table->decimal('prix_total_decks', 10, 2)->default(0.00);
@@ -26,8 +26,8 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
+        Schema::create('mot_de_passe_reset_tokens', function (Blueprint $table) {
+            $table->string('couriel')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });

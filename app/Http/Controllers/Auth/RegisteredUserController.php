@@ -3,13 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Requests\UtilisateurRequest;
+use App\Models\Utilisateur;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
 {
@@ -18,30 +15,21 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): \Illuminate\Http\JsonResponse
+    public function store(UtilisateurRequest $request): array
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->string('password')),
-        ]);
+        $user = Utilisateur::create($request->validated());
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        $token = $user->createToken('CommanderLedger')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'message' => 'Registration successful',
-            'user' => $user,
-            'token' => $token,
-        ], 201);
+        return [
+            "id" => $user->id,
+            "nom" => $user->nom,
+            "couriel" => $user->couriel,
+            "token" => $token,
+        ];
     }
 }
