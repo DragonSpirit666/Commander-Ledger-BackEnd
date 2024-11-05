@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UtilisateurRequest;
+use App\Http\Resources\UtilisateurResource;
 use App\Models\Utilisateur;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
@@ -26,10 +27,10 @@ class RegisteredUserController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
-            "id" => $user->id,
-            "nom" => $user->nom,
-            "couriel" => $user->couriel,
-            "token" => $token,
+            "data" => [
+                "utilisateur" => new UtilisateurResource($user),
+                "token" => $token,
+            ],
         ];
     }
 }

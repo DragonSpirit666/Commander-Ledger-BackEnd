@@ -21,7 +21,7 @@ class Utilisateur extends Authenticatable
     protected $fillable = [
         'nom',
         'couriel',
-        'mot_de_passe',
+        'password',
         'photo',
         'prive',
         'nb_parties_gagnees',
@@ -35,7 +35,7 @@ class Utilisateur extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'mot_de_passe',
+        'password',
         'remember_token',
     ];
 
@@ -48,7 +48,7 @@ class Utilisateur extends Authenticatable
     {
         return [
             'couriel_verified_at' => 'datetime',
-            'mot_de_passe' => 'hashed',
+            'password' => 'hashed',
             'prive' => 'boolean',
             'nb_parties_gagnees' => 'integer',
             'nb_parties_perdues' => 'integer',

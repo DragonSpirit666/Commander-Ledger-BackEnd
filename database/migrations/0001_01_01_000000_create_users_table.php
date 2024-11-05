@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nom');
             $table->string('couriel')->unique();
             $table->timestamp('couriel_verifier_a')->nullable();
-            $table->string('mot_de_passe');
+            $table->string('password');
             $table->binary('photo')->nullable();
             $table->boolean('prive')->default(false);
             $table->integer('nb_parties_gagnees')->default(0);
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('mot_de_passe_reset_tokens', function (Blueprint $table) {
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('couriel')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
