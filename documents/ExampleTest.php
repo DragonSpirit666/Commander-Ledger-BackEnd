@@ -1,4 +1,10 @@
 <?php
+/**
+ * Ce fichier est un fichier d'example d'une série de test.
+ *
+ * Création d'un test avec : sail php artisan pest:test UtilisateurApiTest --unit
+ * Exécuter les tests avec : sail php artisan test
+ */
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
