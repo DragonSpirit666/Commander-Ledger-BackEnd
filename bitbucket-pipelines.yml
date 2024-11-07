@@ -1,7 +1,7 @@
 options:
   docker: true
 
-image: composer:2
+image: laravelsail/php83-composer:latest
 
 pipelines:
   branches:
