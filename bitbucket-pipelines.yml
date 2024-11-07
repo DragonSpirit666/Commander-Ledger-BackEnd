@@ -20,6 +20,11 @@ pipelines:
                 echo "Composer install failed"
                 exit 1
               fi
+            - ls
+            - cd vendor/bin
+            - ls
+            - cd ..
+            - cd ..
             - ./vendor/bin/sail up -d
             - ./vendor/bin/sail php artisan test
             - ./vendor/bin/sail down
