@@ -5,7 +5,7 @@ pipelines:
   branches:
     Test-Pipeline:
       - step:
-          name: Install Dependencies
+          name: Install Vendor
           script:
             - echo "Installing dependencies"
             - cp .env.example .env
@@ -21,6 +21,6 @@ pipelines:
           script:
             - echo "Starting Build and Test for the Backend"
             - ./vendor/bin/sail up -d
-            - ./vendor/bin/sail exec app bash -c 'until nc -z localhost 80; do sleep 1; done'
-            - ./vendor/bin/phpunit
+            - sleep 30
+            - ./vendor/bin/sail artisan run test
             - ./vendor/bin/sail down
