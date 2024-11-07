@@ -9,12 +9,19 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 });
 
 Route::prefix('utilisateurs')
-    ->controller(ProfileController::class)
     ->middleware(['auth:sanctum'])
     ->group(function () {
-        Route::get('/', 'indexUtilisateur');
-    });
+        // Route pour la liste des utilisateurs
+        Route::get('/', [ProfileController::class, 'indexUtilisateur']);
+        // Route pour obtenir un utilisateur
+        Route::get('/{id}', [ProfileController::class, 'showUtilisateur']);
+        // Route pour la modification utilisateur
+        Route::put('/{id}', [ProfileController::class, 'updateUtilisateur']);
+        // Route pour supprimer un utilisateur
+        Route::put('/{id}', [ProfileController::class, 'destroyUtilisateur']);
+});
 
 Route::middleware(['api'])->group(function () {
     require __DIR__ . '/auth.php';
 });
+

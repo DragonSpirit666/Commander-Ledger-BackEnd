@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 class UtilisateurCollection extends ResourceCollection
 {
     /**
-     * Transform the resource collection into an array.
+     * Transforme la collection ressource en array.
      *
      * @return array<int|string, mixed>
      */

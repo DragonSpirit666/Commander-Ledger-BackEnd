@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Générer la migration.
      */
     public function up(): void
     {
@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('couriel')->unique();
             $table->timestamp('couriel_verifier_a')->nullable();
             $table->string('password');
-            $table->binary('photo')->nullable();
+            $table->string('photo')->nullable();
             $table->boolean('prive')->default(false);
             $table->integer('nb_parties_gagnees')->default(0);
             $table->integer('nb_parties_perdues')->default(0);

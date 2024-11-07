@@ -14,14 +14,11 @@ class Utilisateur extends Authenticatable
     use HasFactory, HasApiTokens, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Les attributs qui peuvent être assignés en masse.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'nom',
-        'couriel',
-        'password',
         'photo',
         'prive',
         'nb_parties_gagnees',
@@ -30,7 +27,7 @@ class Utilisateur extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * Les attributs qui doivent être cachés lors de la sérialisation.
      *
      * @var array<int, string>
      */
@@ -40,7 +37,7 @@ class Utilisateur extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Obtenez les attributs qui doivent être convertis.
      *
      * @return array<string, string>
      */

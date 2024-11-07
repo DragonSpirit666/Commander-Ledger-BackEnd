@@ -4,34 +4,79 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Resources\UtilisateurCollection;
-use App\Http\Resources\UtilisateurResource;
 use App\Models\Utilisateur;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
 
+/**
+ * Controleur des utilisateurs
+ */
 class ProfileController extends Controller
 {
-    public function indexUtilisateur(): array
+    public function indexUtilisateur(): JsonResponse
     {
         $utilisateurs = Utilisateur::all();
 
-        return [
-            "data" => [
-                "utilisateurs" => new UtilisateurCollection($utilisateurs),
-            ],
-        ];
+        return response()->json(new UtilisateurCollection($utilisateurs));
     }
 
     /**
-     * Display the user's profile form.
+     * Renvoyer un utilisateur
+     *
+     * @param $id
+     * @return JsonResponse
      */
-    public function edit(Request $request): View
+    public function showUtilisateur($id): JsonResponse
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
+        $utilisateur = Utilisateur::findOrFail($id);
+
+        return response()->json([
+            'data' => $utilisateur,
+        ]);
+    }
+
+    /**
+     * Modification d'un utilisateur
+     *
+     * @param Request $requete
+     * @param $id
+     * @return JsonResponse
+     */
+    public function updateUtilisateur(Request $requete, $id): JsonResponse
+    {
+        $donneesValide = $requete->validate([
+            'photo' => 'nullable|string|max:255',
+            'prive' => 'required|boolean',
+            'nb_parties_gagnees' => 'required|integer|min:0',
+            'nb_parties_perdues' => 'required|integer|min:0',
+            'prix_total_decks' => 'required|numeric|min:0',
+        ]);
+
+        $utilisateur = Utilisateur::findOrFail($id);
+        $utilisateur->update($donneesValide);
+
+        return response()->json([
+            'message' => 'Utilisateur mis à jour avec succès',
+            'data' => $utilisateur,
+        ]);
+    }
+
+    /**
+     * Supression d'un utilisateur
+     *
+     * @param $id
+     * @return JsonResponse
+     */
+    public function destroyUtilisateur($id): JsonResponse
+    {
+        $utilisateur = Utilisateur::findOrFail($id);
+        $utilisateur->delete();
+
+        return response()->json([
+            'message' => 'Utilisateur supprimé avec succès',
         ]);
     }
 
