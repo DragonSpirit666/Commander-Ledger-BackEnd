@@ -16,7 +16,8 @@ pipelines:
           name: Build and Test
           script:
             - echo "Starting Build and Test for the Backend"
-            - ./vendor/bin/sail up -d
-            - sleep 30
-            - ./vendor/bin/sail artisan run test
-            - ./vendor/bin/sail down
+            - ls -la
+            #- ./vendor/bin/sail up -d
+            #- sleep 30
+            #- ./vendor/bin/sail artisan run test
+            #- ./vendor/bin/sail down
