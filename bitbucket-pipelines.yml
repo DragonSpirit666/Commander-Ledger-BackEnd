@@ -3,7 +3,7 @@ options:
 
 pipelines:
   branches:
-    Test-Pipeline:
+    P2E2-43-pipeline-automatique-test-back-e:
       - step:
           name: Install Vendor
           script:
