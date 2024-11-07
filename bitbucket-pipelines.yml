@@ -20,13 +20,6 @@ pipelines:
                 echo "Composer install failed"
                 exit 1
               fi
-
-      - step:
-          name: Run Tests
-          caches:
-            - docker
-            - composer
-          script:
             - ./vendor/bin/sail up -d
             - ./vendor/bin/sail php artisan test
             - ./vendor/bin/sail down
