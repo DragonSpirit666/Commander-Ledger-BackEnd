@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Resources\UtilisateurCollection;
+use App\Http\Resources\UtilisateurResource;
+use App\Models\Utilisateur;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +14,17 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    public function indexUtilisateur(): array
+    {
+        $utilisateurs = Utilisateur::all();
+
+        return [
+            "data" => [
+                "utilisateurs" => new UtilisateurCollection($utilisateurs),
+            ],
+        ];
+    }
+
     /**
      * Display the user's profile form.
      */

@@ -24,7 +24,7 @@ class UtilisateurRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nom' => ['required', 'string', 'max:255'],
+            'nom' => ['required', 'string', 'max:255', 'unique:'.Utilisateur::class],
             'couriel' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.Utilisateur::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ];
