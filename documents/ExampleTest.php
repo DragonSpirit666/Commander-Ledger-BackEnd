@@ -4,6 +4,7 @@
  *
  * Création d'un test avec : sail php artisan pest:test UtilisateurApiTest --unit
  * Exécuter les tests avec : sail php artisan test
+ *                        ou sail php ./vendor/bin/pest
  */
 
 use App\Models\User;
