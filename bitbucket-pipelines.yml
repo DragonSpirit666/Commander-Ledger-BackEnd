@@ -1,0 +1,26 @@
+options:
+  docker: true
+
+pipelines:
+  branches:
+    Test-Pipeline:
+      - step:
+          name: Install Dependencies
+          script:
+            - echo "Installing dependencies"
+            - cp .env.example .env
+            - docker run --rm \
+              -u "$(id -u):$(id -g)" \
+              -v "$(pwd):/var/www/html" \
+              -w /var/www/html \
+              laravelsail/php83-composer:latest \
+              composer install --ignore-platform-reqs
+
+      - step:
+          name: Build and Test
+          script:
+            - echo "Starting Build and Test for the Backend"
+            - ./vendor/bin/sail up -d
+            - ./vendor/bin/sail exec app bash -c 'until nc -z localhost 80; do sleep 1; done'
+            - ./vendor/bin/phpunit
+            - ./vendor/bin/sail down
