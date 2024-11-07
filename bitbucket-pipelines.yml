@@ -7,15 +7,26 @@ pipelines:
   branches:
     P2E2-43-pipeline-automatique-test-back-e:
       - step:
-          name: Install Vendor
-          script:
-            - echo "Installing dependencies"
-            - cp .env.example .env
-
-            - docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/var/www/html" -w /var/www/html laravelsail/php83-composer:latest composer install --ignore-platform-reqs
-            - ./vendor/bin/sail up -d
-            - ./vendor/bin/sail php artisan run test
-            - ./vendor/bin/sail down
+          name: Install Dependencies
           caches:
             - docker
             - composer
+          script:
+            - echo "Copying environment file and installing dependencies"
+            - cp .env.example .env
+            - docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/var/www/html" -w /var/www/html laravelsail/php83-composer:latest composer install --ignore-platform-reqs
+            - |
+              if [ $? -ne 0 ]; then
+                echo "Composer install failed"
+                exit 1
+              fi
+
+      - step:
+          name: Run Tests
+          caches:
+            - docker
+            - composer
+          script:
+            - ./vendor/bin/sail up -d
+            - ./vendor/bin/sail php artisan test
+            - ./vendor/bin/sail down
