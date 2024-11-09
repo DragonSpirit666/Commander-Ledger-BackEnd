@@ -25,7 +25,7 @@ class UtilisateurRequest extends FormRequest
     {
         return [
             'nom' => ['required', 'string', 'max:255', 'unique:'.Utilisateur::class],
-            'couriel' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.Utilisateur::class],
+            'courriel' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.Utilisateur::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ];
     }

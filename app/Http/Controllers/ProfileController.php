@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Resources\UtilisateurCollection;
+use App\Http\Resources\UtilisateurResource;
 use App\Models\Utilisateur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Str;
 
 /**
  * Controleur des utilisateurs
@@ -18,7 +20,7 @@ class ProfileController extends Controller
 {
     public function indexUtilisateur(): JsonResponse
     {
-        $utilisateurs = Utilisateur::all();
+        $utilisateurs = Utilisateur::withTrashed()->get();
 
         return response()->json(new UtilisateurCollection($utilisateurs));
     }
@@ -34,7 +36,7 @@ class ProfileController extends Controller
         $utilisateur = Utilisateur::findOrFail($id);
 
         return response()->json([
-            'data' => $utilisateur,
+            'data' => new UtilisateurResource($utilisateur),
         ]);
     }
 
@@ -48,19 +50,20 @@ class ProfileController extends Controller
     public function updateUtilisateur(Request $requete, $id): JsonResponse
     {
         $donneesValide = $requete->validate([
+            'nom' => 'required|string',
+            'courriel' => 'required|string|email',
             'photo' => 'nullable|string|max:255',
             'prive' => 'required|boolean',
-            'nb_parties_gagnees' => 'required|integer|min:0',
-            'nb_parties_perdues' => 'required|integer|min:0',
-            'prix_total_decks' => 'required|numeric|min:0',
         ]);
+
+        $donneesValide['prive'] = filter_var($donneesValide['prive'], FILTER_VALIDATE_BOOLEAN);
 
         $utilisateur = Utilisateur::findOrFail($id);
         $utilisateur->update($donneesValide);
 
         return response()->json([
             'message' => 'Utilisateur mis à jour avec succès',
-            'data' => $utilisateur,
+            'data' => new UtilisateurResource($utilisateur),
         ]);
     }
 
@@ -73,10 +76,20 @@ class ProfileController extends Controller
     public function destroyUtilisateur($id): JsonResponse
     {
         $utilisateur = Utilisateur::findOrFail($id);
+
+        $utilisateur->update([
+            'nom' => 'Inconnu' . $utilisateur->id,
+            'courriel' => 'inconnu' . $utilisateur->id . '@example.com',
+            'photo' => null,
+            'prive' => true,
+            'password' => bcrypt(Str::random()),
+        ]);
+
+        // Soft delete
         $utilisateur->delete();
 
         return response()->json([
-            'message' => 'Utilisateur supprimé avec succès',
+            'message' => 'Utilisateur anonymisé et désactivé avec succès.',
         ]);
     }
 
@@ -94,26 +107,5 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
-    }
-
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
-
-        $user = $request->user();
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
     }
 }

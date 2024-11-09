@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
+use Database\Factories\UtilisateurFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class Utilisateur extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasApiTokens, Notifiable;
+    /** @use HasFactory<UtilisateurFactory> */
+    use HasFactory, HasApiTokens, Notifiable, SoftDeletes;
 
     /**
      * Les attributs qui peuvent être assignés en masse.
@@ -19,6 +22,9 @@ class Utilisateur extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'nom',
+        'courriel',
+        'password',
         'photo',
         'prive',
         'nb_parties_gagnees',
@@ -44,7 +50,7 @@ class Utilisateur extends Authenticatable
     protected function casts(): array
     {
         return [
-            'couriel_verified_at' => 'datetime',
+            'courriel_verified_at' => 'datetime',
             'password' => 'hashed',
             'prive' => 'boolean',
             'nb_parties_gagnees' => 'integer',

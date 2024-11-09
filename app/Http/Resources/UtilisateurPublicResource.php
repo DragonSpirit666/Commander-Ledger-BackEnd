@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Collection pour envoyer les informations "publique" de plusieurs utilisateurs (tout sauf le couriel)
+ * Collection pour envoyer les informations "publique" de plusieurs utilisateurs (tout sauf le courriel)
  */
 class UtilisateurPublicResource extends JsonResource
 {

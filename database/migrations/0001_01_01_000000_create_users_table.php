@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('utilisateurs', function (Blueprint $table) {
             $table->id();
             $table->string('nom')->unique();
-            $table->string('couriel')->unique();
-            $table->timestamp('couriel_verifier_a')->nullable();
+            $table->string('courriel')->unique();
+            $table->timestamp('courriel_verifier_a')->nullable();
             $table->string('password');
             $table->string('photo')->nullable();
             $table->boolean('prive')->default(false);
@@ -27,7 +27,7 @@ return new class extends Migration
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('couriel')->primary();
+            $table->string('courriel')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
