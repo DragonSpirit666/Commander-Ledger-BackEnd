@@ -22,7 +22,18 @@ return new class extends Migration
             $table->double('salt')->nullable();
             $table->double('pourcentage_utilisation');
             $table->boolean('supprime')->default(false);
-            $table->foreign('utilisateur_id')->references('id')->on('utilisateurs');
+            $table->bigInteger('utilisateur_id')->unsigned();
+            $table->double('pourcentage_cartes_bleues');
+            $table->double('pourcentage_cartes_jaunes');
+            $table->double('pourcentage_cartes_rouges');
+            $table->double('pourcentage_cartes_noires');
+            $table->double('pourcentage_cartes_vertes');
+            $table->double('pourcentage_cartes_blanches');
+            $table->foreign('utilisateur_id')
+                ->references('id')
+                ->on('utilisateurs')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->timestamps();
         });
     }

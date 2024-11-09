@@ -17,6 +17,13 @@ class Deck extends Model
         'prix',
         'salt',
         'pourcentage_utilisation',
-        'supprime'
+        'supprime',
+        'utilisateur_id',
+        'pourcentage_cartes_bleues',
+        'pourcentage_cartes_jaunes',
+        'pourcentage_cartes_rouges',
+        'pourcentage_cartes_noires',
+        'pourcentage_cartes_vertes',
+        'pourcentage_cartes_blanches'
     ];
 }
