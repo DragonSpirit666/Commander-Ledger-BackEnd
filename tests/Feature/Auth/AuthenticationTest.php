@@ -17,7 +17,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $response = $this->post('/login', [
-            'courriel' => $utilisateur->email,
+            'courriel' => $utilisateur->courriel,
             'password' => 'password',
         ]);
 
@@ -25,7 +25,7 @@ class AuthenticationTest extends TestCase
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->getJson('/api/some-protected-route');
+        ])->getJson('/api/utilisateurs');
 
         $this->assertAuthenticated();
         $response->assertStatus(200);
@@ -52,4 +52,6 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
         $response->assertNoContent();
     }
+
 }
+
