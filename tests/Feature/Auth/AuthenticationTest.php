@@ -12,23 +12,31 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
-        $user = Utilisateur::factory()->create();
+        $utilisateur = Utilisateur::factory()->create([
+            'password' => bcrypt('password'),
+        ]);
 
         $response = $this->post('/login', [
-            'email' => $user->email,
+            'courriel' => $utilisateur->email,
             'password' => 'password',
         ]);
 
+        $token = $response->json('token');
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->getJson('/api/some-protected-route');
+
         $this->assertAuthenticated();
-        $response->assertNoContent();
+        $response->assertStatus(200);
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
     {
-        $user = Utilisateur::factory()->create();
+        $utilisateur = Utilisateur::factory()->create();
 
         $this->post('/login', [
-            'email' => $user->email,
+            'courriel' => $utilisateur->courriel,
             'password' => 'wrong-password',
         ]);
 
@@ -37,9 +45,9 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_logout(): void
     {
-        $user = Utilisateur::factory()->create();
+        $utilisateur = Utilisateur::factory()->create();
 
-        $response = $this->actingAs($user)->post('/logout');
+        $response = $this->actingAs($utilisateur)->post('/logout');
 
         $this->assertGuest();
         $response->assertNoContent();

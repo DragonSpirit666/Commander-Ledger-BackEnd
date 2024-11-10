@@ -25,7 +25,16 @@ class UtilisateurFactory extends Factory
             'courriel' => fake()->unique()->safeEmail(),
             'photo' => fake()->imageUrl(),
             'prive' => fake()->boolean,
-            'password' => bcrypt('password'),
+            'password' => '$2y$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
         ];
+    }
+
+    public function unverified()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'email_verified_at' => null,
+            ];
+        });
     }
 }
