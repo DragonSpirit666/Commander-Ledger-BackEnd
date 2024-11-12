@@ -83,7 +83,7 @@ class ProfileController extends Controller
     {
         $utilisateur = Utilisateur::findOrFail($id);
 
-        $utilisateurNonModifie = $utilisateur;
+        $utilisateurNonModifie = $utilisateur->replicate();
 
         $utilisateur->update([
             'nom' => 'Inconnu' . $utilisateur->id,
