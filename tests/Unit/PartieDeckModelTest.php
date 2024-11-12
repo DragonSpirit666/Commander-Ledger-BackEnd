@@ -3,6 +3,7 @@
 use App\Models\Deck;
 use App\Models\Partie;
 use App\Models\PartieDeck;
+use App\Models\Utilisateur;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
