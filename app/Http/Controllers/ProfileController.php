@@ -77,6 +77,8 @@ class ProfileController extends Controller
     {
         $utilisateur = Utilisateur::findOrFail($id);
 
+        $utilisateurNonModifie = $utilisateur->replicate();
+
         $utilisateur->update([
             'nom' => 'Inconnu' . $utilisateur->id,
             'courriel' => 'inconnu' . $utilisateur->id . '@example.com',
@@ -90,6 +92,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'message' => 'Utilisateur anonymisé et désactivé avec succès.',
+            'data' => new UtilisateurResource($utilisateurNonModifie),
         ]);
     }
 

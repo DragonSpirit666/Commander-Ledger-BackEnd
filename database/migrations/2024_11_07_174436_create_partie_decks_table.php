@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('partie_decks', function (Blueprint $table) {
+        Schema::create('parties_decks', function (Blueprint $table) {
             $table->id();
             $table->integer('position')->nullable();
             $table->boolean('validee')->default(false);

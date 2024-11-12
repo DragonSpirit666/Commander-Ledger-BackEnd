@@ -11,16 +11,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PartieDeck extends Model
 {
     protected $fillable = [
-        'valide',
+        'validee',
         'position',
+        'partie_id',
+        'deck_id'
     ];
+
+    protected $table = 'parties_decks';
 
     /**
      * Trouve la partie associée
      *
      * @return BelongsTo une partie
      */
-    protected function partie() : BelongsTo
+    public function partie() : BelongsTo
     {
         return $this->belongsTo(Partie::class);
     }
@@ -30,7 +34,7 @@ class PartieDeck extends Model
      *
      * @return BelongsTo un deck
      */
-    protected function deck() : BelongsTo
+    public function deck() : BelongsTo
     {
         return $this->belongsTo(Deck::class);
     }
