@@ -11,11 +11,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Partie extends Model
 {
     protected $fillable = [
+        'date',
+        'nb_participants',
         'termine',
         'gagnant_id',
+        'createur_id'
     ];
 
-    // TODO import Utilisateur quand pulled
     /**
      * Trouve le gagnant de la partie
      *
@@ -26,7 +28,6 @@ class Partie extends Model
         return $this->belongsTo(Utilisateur::class, 'gagnant_id');
     }
 
-    // TODO import Utilisateur quand pulled
     /**
      * Trouve le créateur de la partie
      *

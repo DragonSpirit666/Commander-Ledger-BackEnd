@@ -25,7 +25,6 @@ class PartieDeck extends Model
         return $this->belongsTo(Partie::class);
     }
 
-    // TODO import Deck quand pulled
     /**
      * Trouve le deck associé
      *
