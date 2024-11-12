@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'paths' => ['*'],
+    'paths' => ['commander-ledger/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
 
