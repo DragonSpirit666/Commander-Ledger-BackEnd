@@ -23,7 +23,7 @@ class Partie extends Model
      *
      * @return BelongsTo un utilisateur
      */
-    protected function gagnant() : BelongsTo
+    public function gagnant() : BelongsTo
     {
         return $this->belongsTo(Utilisateur::class, 'gagnant_id');
     }
@@ -33,7 +33,7 @@ class Partie extends Model
      *
      * @return BelongsTo un utilisateur
      */
-    protected function createur() : BelongsTo
+    public function createur() : BelongsTo
     {
         return $this->belongsTo(Utilisateur::class, 'createur_id');
     }

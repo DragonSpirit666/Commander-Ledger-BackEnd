@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->date('date');
             $table->integer('nb_participants');
-            $table->boolean('termine');
+            $table->boolean('termine')->default(false);
             $table->foreignId('createur_id')->constrained('utilisateurs');
-            $table->foreignId('gagnant_id')->constrained('utilisateurs');
+            $table->foreignId('gagnant_id')->nullable()->constrained('utilisateurs');
             $table->timestamps();
         });
     }
