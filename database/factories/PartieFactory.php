@@ -6,6 +6,8 @@ use App\Models\Utilisateur;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
+ * Factory qui retourne une Partie
+ *
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Partie>
  */
 class PartieFactory extends Factory

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Exécute la migration pour faite la table "parites_decks"
      */
     public function up(): void
     {
@@ -22,7 +22,7 @@ return new class extends Migration
     }
 
     /**
-     * Reverse the migrations.
+     * Retire la table "parties_decks"
      */
     public function down(): void
     {

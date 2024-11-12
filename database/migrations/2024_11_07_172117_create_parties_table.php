@@ -4,10 +4,13 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Migration pour faire la table des parties
+ */
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Exécute la migration pour faire la table "parties"
      */
     public function up(): void
     {
@@ -23,7 +26,7 @@ return new class extends Migration
     }
 
     /**
-     * Reverse the migrations.
+     * Retire la table "parties"
      */
     public function down(): void
     {
