@@ -12,12 +12,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Controleur des utilisateurs
  */
 class ProfileController extends Controller
 {
+    /**
+     * Envoi la liste des utilisateurs
+     *
+     * @return JsonResponse
+     */
     public function indexUtilisateur(): JsonResponse
     {
         $utilisateurs = Utilisateur::withTrashed()->get();
@@ -50,7 +56,7 @@ class ProfileController extends Controller
     public function updateUtilisateur(Request $requete, $id): JsonResponse
     {
         $donneesValide = $requete->validate([
-            'nom' => 'required|string',
+            'nom' => 'required|string|unique:utilisateurs,nom,' . $id,
             'courriel' => 'required|string|email',
             'photo' => 'nullable|string|max:255',
             'prive' => 'required|boolean',
@@ -77,6 +83,8 @@ class ProfileController extends Controller
     {
         $utilisateur = Utilisateur::findOrFail($id);
 
+        $utilisateurNonModifie = $utilisateur;
+
         $utilisateur->update([
             'nom' => 'Inconnu' . $utilisateur->id,
             'courriel' => 'inconnu' . $utilisateur->id . '@example.com',
@@ -90,6 +98,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'message' => 'Utilisateur anonymisé et désactivé avec succès.',
+            'data' => new UtilisateurResource($utilisateurNonModifie),
         ]);
     }
 
