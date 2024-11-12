@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Deck extends Model
 {
@@ -26,4 +27,9 @@ class Deck extends Model
         'pourcentage_cartes_vertes',
         'pourcentage_cartes_blanches'
     ];
+
+    public function utilisateur() : BelongsTo
+    {
+        return $this->belongsTo(Utilisateur::class, 'utilisateur_id');
+    }
 }

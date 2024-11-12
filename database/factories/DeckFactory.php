@@ -18,12 +18,12 @@ class DeckFactory extends Factory
     {
         return [
             'nom' =>$this->faker->name(),
-            'nb_parties_gagnage' =>$this->faker->numberBetween(1,10),
+            'nb_parties_gagnees' =>$this->faker->numberBetween(1,10),
             'cartes' =>$this->faker->words(15, true),
             'nb_parties_perdues' =>$this->faker->numberBetween(1,10),
             'prix' =>$this->faker->numberBetween(1,200),
             'pourcentage_utilisation' =>$this->faker->numberBetween(1,100),
-            'user_id' =>$this->faker->numberBetween(1,10),
+            'utilisateur_id' =>$this->faker->numberBetween(1,10),
             'pourcentage_cartes_bleues' =>$this->faker->numberBetween(1,100),
             'pourcentage_cartes_jaunes' =>$this->faker->numberBetween(1,100),
             'pourcentage_cartes_rouges' =>$this->faker->numberBetween(1,100),
