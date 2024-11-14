@@ -16,19 +16,19 @@ return new class extends Migration
             $table->string('nom', 100);
             $table->string('photo')->nullable();
             $table->string('cartes');
-            $table->integer('nb_parties_gagnees');
-            $table->integer('nb_parties_perdues');
-            $table->double('prix');
+            $table->integer('nb_parties_gagnees')->default(0);
+            $table->integer('nb_parties_perdues')->default(0);
+            $table->double('prix')->default(0);
             $table->double('salt')->nullable();
             $table->double('pourcentage_utilisation');
             $table->boolean('supprime')->default(false);
             $table->bigInteger('utilisateur_id')->unsigned();
-            $table->double('pourcentage_cartes_bleues');
-            $table->double('pourcentage_cartes_jaunes');
-            $table->double('pourcentage_cartes_rouges');
-            $table->double('pourcentage_cartes_noires');
-            $table->double('pourcentage_cartes_vertes');
-            $table->double('pourcentage_cartes_blanches');
+            $table->double('pourcentage_cartes_bleues')->default(0);
+            $table->double('pourcentage_cartes_jaunes')->default(0);
+            $table->double('pourcentage_cartes_rouges')->default(0);
+            $table->double('pourcentage_cartes_noires')->default(0);
+            $table->double('pourcentage_cartes_vertes')->default(0);
+            $table->double('pourcentage_cartes_blanches')->default(0);
             $table->foreign('utilisateur_id')
                 ->references('id')
                 ->on('utilisateurs')
@@ -39,7 +39,7 @@ return new class extends Migration
     }
 
     /**
-     * Reverse the migrations.
+     * Détruit la table de migration.
      */
     public function down(): void
     {

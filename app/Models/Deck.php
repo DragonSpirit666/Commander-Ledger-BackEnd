@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Définie les champs possible pour le model d'un deck.
+ */
 class Deck extends Model
 {
     use HasFactory;
@@ -28,6 +31,10 @@ class Deck extends Model
         'pourcentage_cartes_blanches'
     ];
 
+    /**
+     * Définie l'utilisateur qui possède le deck.
+     * @return BelongsTo l'utilisateur qui possède le deck.
+     */
     public function utilisateur() : BelongsTo
     {
         return $this->belongsTo(Utilisateur::class, 'utilisateur_id');
