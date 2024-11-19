@@ -8,75 +8,104 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('peut créer une partie', function () {
-    $this->seed();
-    $utilisateur = Utilisateur::get()[0];
+describe('Test la route pour créer une partie', function () {
+    it('peut créer une partie', function () {
+        $this->seed();
+        $nbParties = Partie::count();
+        $nbPartiesDecks = PartieDeck::count();
+        $utilisateur = Utilisateur::get()[0];
 
-    $this->actingAs($utilisateur);
+        $this->actingAs($utilisateur);
 
-    $partieInfo = [
-        "date" => date('Y/m/d'),
-        "participants" => [
-            ["deck_id" => Deck::get()[0]->id],
-            ["deck_id" => Deck::get()[1]->id, "position" => 2],
-        ],
-    ];
+        $partieInfo = [
+            "date" => date('Y/m/d'),
+            "participants" => [
+                ["deck_id" => Deck::get()[0]->id],
+                ["deck_id" => Deck::get()[1]->id, "position" => 2],
+            ],
+        ];
 
-    $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
+        $response = $this->postJson('/commander-ledger/utilisateurs/' . $utilisateur->id . '/parties', $partieInfo);
 
-    $response->assertStatus(200);
-    $this->assertEquals(11, Partie::count());
-    $this->assertEquals(2, PartieDeck::count());
+        $response->assertStatus(200);
+        $this->assertEquals($nbParties + 1, Partie::count());
+        $this->assertEquals($nbPartiesDecks + 2, PartieDeck::count());
+    });
+
+    it('necessite d\'être authentifié', function () {
+        $this->seed();
+        $nbParties = Partie::count();
+        $nbPartiesDecks = PartieDeck::count();
+        $utilisateur = Utilisateur::get()[0];
+
+        $partieInfo = [
+            "date" => date('Y/m/d'),
+            "participants" => [
+                ["deck_id" => Deck::get()[0]->id],
+                ["deck_id" => Deck::get()[1]->id, "position" => 2],
+            ],
+        ];
+
+        $response = $this->postJson('/commander-ledger/utilisateurs/' . $utilisateur->id . '/parties', $partieInfo);
+        $response->assertStatus(401);
+        $this->assertEquals($nbParties, Partie::count());
+        $this->assertEquals($nbPartiesDecks, PartieDeck::count());
+    });
+
+    it('retourne un erreur 422 si un champ n\'est pas présent ou valide', function () {
+        $this->seed();
+        $nbParties = Partie::count();
+        $nbPartiesDecks = PartieDeck::count();
+        $utilisateur = Utilisateur::get()[0];
+
+        $this->actingAs($utilisateur);
+
+        $partieInfo = [
+            "participants" => [
+                ["deck_id" => Deck::get()[0]->id],
+                ["deck_id" => Deck::get()[1]->id, "position" => 2],
+            ],
+        ];
+
+        $response = $this->postJson('/commander-ledger/utilisateurs/' . $utilisateur->id . '/parties', $partieInfo);
+
+        $response->assertStatus(422);
+        $this->assertEquals($nbParties, Partie::count());
+        $this->assertEquals($nbPartiesDecks, PartieDeck::count());
+
+        $partieInfo = [
+            "date" => date('y-m-d'),
+            "participants" => [
+                ["deck_id" => Deck::get()[0]->id],
+                ["deck_id" => Deck::get()[1]->id, "position" => 2],
+            ],
+        ];
+
+        $response = $this->postJson('/commander-ledger/utilisateurs/' . $utilisateur->id . '/parties', $partieInfo);
+
+        $response->assertStatus(422);
+        $this->assertEquals($nbParties, Partie::count());
+        $this->assertEquals($nbPartiesDecks, PartieDeck::count());
+    });
 });
 
-it('necessite d\'être authentifié', function () {
-    $this->seed();
-    $utilisateur = Utilisateur::get()[0];
+describe('Test la route pour get les parties d\'un utilisateur', function () {
+    it('peut get les parties', function () {
+        $this->seed();
+        $utilisateur = Utilisateur::get()[0];
 
-    $partieInfo = [
-        "date" => date('Y/m/d'),
-        "participants" => [
-            ["deck_id" => Deck::get()[0]->id],
-            ["deck_id" => Deck::get()[1]->id, "position" => 2],
-        ],
-    ];
+        $this->actingAs($utilisateur);
 
-    $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
-    $response->assertStatus(401);
-    $this->assertEquals(10, Partie::count());
-    $this->assertEquals(0, PartieDeck::count());
-});
+        $response = $this->getJson('/commander-ledger/utilisateurs/' . $utilisateur->id . '/parties');
 
-it('retourne un erreur 422 si un champ n\'est pas présent ou valide', function () {
-    $this->seed();
-    $utilisateur = Utilisateur::get()[0];
+        $response->assertStatus(200);
+    });
 
-    $this->actingAs($utilisateur);
+    it('necessite d\'être authentifié', function () {
+        $this->seed();
+        $utilisateur = Utilisateur::get()[0];
 
-    $partieInfo = [
-        "participants" => [
-            ["deck_id" => Deck::get()[0]->id],
-            ["deck_id" => Deck::get()[1]->id, "position" => 2],
-        ],
-    ];
-
-    $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
-
-    $response->assertStatus(422);
-    $this->assertEquals(10, Partie::count());
-    $this->assertEquals(0, PartieDeck::count());
-
-    $partieInfo = [
-        "date" => date('y-m-d'),
-        "participants" => [
-            ["deck_id" => Deck::get()[0]->id],
-            ["deck_id" => Deck::get()[1]->id, "position" => 2],
-        ],
-    ];
-
-    $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
-
-    $response->assertStatus(422);
-    $this->assertEquals(10, Partie::count());
-    $this->assertEquals(0, PartieDeck::count());
+        $response = $this->getJson('/commander-ledger/utilisateurs/' . $utilisateur->id . '/parties');
+        $response->assertStatus(401);
+    });
 });
