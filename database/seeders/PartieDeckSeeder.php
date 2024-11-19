@@ -2,19 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Models\Utilisateur;
+use App\Models\PartieDeck;
 use Illuminate\Database\Seeder;
 
 /**
- * Seeder pour la table des utilisateurs
+ * Seeder la table parties_decks
  */
-class UtilisateurSeeder extends Seeder
+class PartieDeckSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Utilisateur::factory()->count(10)->create();
+        PartieDeck::factory()->count(10)->create();
     }
 }

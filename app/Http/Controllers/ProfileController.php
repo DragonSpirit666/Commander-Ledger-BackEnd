@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PartieRequest;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Resources\PartieCollection;
 use App\Http\Resources\PartieResource;
 use App\Http\Resources\UtilisateurCollection;
 use App\Http\Resources\UtilisateurResource;
@@ -173,5 +174,36 @@ class ProfileController extends Controller
             'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
             'participants' => $listePartiesDecks,
         ]);
+    }
+
+    /**
+     * Récupère toutes les parties associées à un utilisateur
+     *
+     * @param int $id id de l'utilisateur dont on veut les parties
+     * @return PartieCollection toutes les parties auquelles l'utilisateur est associé
+     */
+    public function indexPartie(int $id): PartieCollection
+    {
+        $decks = Deck::where('utilisateur_id', $id);
+        $partiesDecksUtilisateur = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->get();
+        $parties = Partie::find($partiesDecksUtilisateur->pluck('partie_id'));
+
+        $partiesDecksTotal = PartieDeck::whereIn('partie_id', $parties->pluck('id'))->get();
+
+        $information = [];
+
+        foreach ($parties as $partie) {
+            $information[] = [
+                'id' => $partie->id,
+                'date' => $partie->date,
+                'nb_participants' => $partie->nb_participants,
+                'terminee' => $partie->teminee,
+                'createur_id' => $id,
+                'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
+                'participants' => $partiesDecksTotal,
+            ];
+        }
+
+        return new PartieCollection($information);
     }
 }
