@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 use function Sodium\add;
 
 /**
@@ -130,6 +132,7 @@ class ProfileController extends Controller
      *
      * @param int $id id de l'utilisateur qui créer la partie
      * @param PartieRequest $request request avec les informations envoyés
+     *
      * @return PartieResource information sur la partie créée
      */
     public function storePartie(int $id, PartieRequest $request) : PartieResource
@@ -180,6 +183,7 @@ class ProfileController extends Controller
      * Récupère toutes les parties associées à un utilisateur
      *
      * @param int $id id de l'utilisateur dont on veut les parties
+     *
      * @return PartieCollection toutes les parties auquelles l'utilisateur est associé
      */
     public function indexPartie(int $id): PartieCollection
@@ -198,12 +202,40 @@ class ProfileController extends Controller
                 'date' => $partie->date,
                 'nb_participants' => $partie->nb_participants,
                 'terminee' => $partie->teminee,
-                'createur_id' => $id,
+                'createur_id' => $partie->createur->id,
                 'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
                 'participants' => $partiesDecksTotal,
             ];
         }
 
         return new PartieCollection($information);
+    }
+
+    /**
+     * Récupère une partie
+     *
+     * @param int $id id de l'utilisateur qui a fait la requête
+     * @param int $partieId id de la partie à récupérer
+     *
+     * @return PartieResource partie trouvée
+     */
+    public function showPartie(int $id, int $partieId): PartieResource {
+        $partie = Partie::find($partieId);
+
+        if ($partie == null) {
+            throw new NotFoundResourceException();
+        }
+
+        $partiesDecks = PartieDeck::where('partie_id', $partieId)->get();
+
+        return new PartieResource([
+            'id' => $partie->id,
+            'date' => $partie->date,
+            'nb_participants' => $partie->nb_participants,
+            'terminee' => $partie->terminee,
+            'createur_id' => $partie->createur->id,
+            'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
+            'participants' => $partiesDecks,
+        ]);
     }
 }
