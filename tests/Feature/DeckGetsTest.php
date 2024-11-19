@@ -12,7 +12,7 @@ describe('DeckGetsTest', function () {
         $deck = Deck::factory()->create(['utilisateur_id' => $utilisateur->id]);
         $deck2 = Deck::factory()->create(['utilisateur_id' => $utilisateur->id]);
 
-        $this->actingAs($utilisateur, 'sanctum');
+        $this->actingAs($utilisateur);
 
         $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur->id}/decks");
 
@@ -25,7 +25,7 @@ describe('DeckGetsTest', function () {
         $utilisateur = Utilisateur::factory()->create();
         $deck = Deck::factory()->create(['utilisateur_id' => $utilisateur->id]);
 
-        $this->actingAs($utilisateur, 'sanctum');
+        $this->actingAs($utilisateur);
 
         $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur->id}/decks/{$deck->id}");
 
@@ -36,7 +36,7 @@ describe('DeckGetsTest', function () {
     test('Donne une erreur si le deck n\'existe pas' , function () {
         $utilisateur = Utilisateur::factory()->create();
 
-        $this->actingAs($utilisateur, 'sanctum');
+        $this->actingAs($utilisateur);
 
         $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur->id}/decks/1");
 
@@ -46,7 +46,7 @@ describe('DeckGetsTest', function () {
     test('Donne une erreur si la requête est mal formée' , function () {
         $utilisateur = Utilisateur::factory()->create();
 
-        $this->actingAs($utilisateur, 'sanctum');
+        $this->actingAs($utilisateur);
 
         $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur->id}/decks/abc");
 
