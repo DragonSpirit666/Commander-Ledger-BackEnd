@@ -21,6 +21,15 @@ Route::prefix('utilisateurs')
         Route::delete('/{id}', [ProfileController::class, 'destroyUtilisateur']);
 });
 
+Route::prefix('utilisateurs')
+    ->middleware(['auth:sanctum'])
+    ->group(function () {
+        // Route pour la liste des utilisateurs
+        Route::get('/{id}/decks', [ProfileController::class, 'indexDeck']);
+        // Route pour obtenir un utilisateur
+        Route::get('/{id}/decks/{deckId}', [ProfileController::class, 'showDeck']);
+});
+
 Route::middleware(['api'])->group(function () {
     require __DIR__ . '/auth.php';
 });
