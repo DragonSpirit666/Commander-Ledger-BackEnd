@@ -124,7 +124,14 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
-    public function storePartie($id, PartieRequest $request) : PartieResource
+    /**
+     * Création d'une partie
+     *
+     * @param int $id id de l'utilisateur qui créer la partie
+     * @param PartieRequest $request request avec les informations envoyés
+     * @return PartieResource information sur la partie créée
+     */
+    public function storePartie(int $id, PartieRequest $request) : PartieResource
     {
         $request->validated();
 

@@ -21,6 +21,8 @@ Route::prefix('utilisateurs')
         Route::delete('/{id}', [ProfileController::class, 'destroyUtilisateur']);
         // Route pour ajouter une partie
         Route::post('/{id}/parties', [ProfileController::class, 'storePartie']);
+        // Route pour get toutes les parties d'un utilisateur
+        Route::get('/{id}/parties', [ProfileController::class, 'indexPartie']);
 });
 
 Route::middleware(['api'])->group(function () {

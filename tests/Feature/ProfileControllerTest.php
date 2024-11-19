@@ -52,7 +52,7 @@ class ProfileControllerTest extends TestCase
     {
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
-        ])->putJson('/api/utilisateurs/' . $this->utilisateur->id, [
+        ])->putJson('/commander-ledger/utilisateurs/' . $this->utilisateur->id, [
             'nom' => 'Nouveau Nom',
             'courriel' => 'nouveau@exemple.com',
             'prive' => true
@@ -66,7 +66,7 @@ class ProfileControllerTest extends TestCase
     {
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
-        ])->deleteJson('/api/utilisateurs/' . $this->utilisateur->id);
+        ])->deleteJson('/commander-ledger/utilisateurs/' . $this->utilisateur->id);
 
         $response->assertStatus(200);
         $response->assertJsonFragment(['message' => 'Utilisateur anonymisé et désactivé avec succès.']);

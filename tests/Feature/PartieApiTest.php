@@ -43,4 +43,40 @@ it('necessite d\'être authentifié', function () {
 
     $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
     $response->assertStatus(401);
+    $this->assertEquals(10, Partie::count());
+    $this->assertEquals(0, PartieDeck::count());
+});
+
+it('retourne un erreur 422 si un champ n\'est pas présent ou valide', function () {
+    $this->seed();
+    $utilisateur = Utilisateur::get()[0];
+
+    $this->actingAs($utilisateur);
+
+    $partieInfo = [
+        "participants" => [
+            ["deck_id" => Deck::get()[0]->id],
+            ["deck_id" => Deck::get()[1]->id, "position" => 2],
+        ],
+    ];
+
+    $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
+
+    $response->assertStatus(422);
+    $this->assertEquals(10, Partie::count());
+    $this->assertEquals(0, PartieDeck::count());
+
+    $partieInfo = [
+        "date" => date('y-m-d'),
+        "participants" => [
+            ["deck_id" => Deck::get()[0]->id],
+            ["deck_id" => Deck::get()[1]->id, "position" => 2],
+        ],
+    ];
+
+    $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
+
+    $response->assertStatus(422);
+    $this->assertEquals(10, Partie::count());
+    $this->assertEquals(0, PartieDeck::count());
 });
