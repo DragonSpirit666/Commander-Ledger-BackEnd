@@ -4,10 +4,10 @@ namespace Database\Factories;
 
 use App\Models\Deck;
 use App\Models\Partie;
-use App\Models\Utilisateur;
 use Illuminate\Database\Eloquent\Factories\Factory;
-
 /**
+ * Factory qui créée des parties_decks
+ *
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PartieDeck>
  */
 class PartieDeckFactory extends Factory

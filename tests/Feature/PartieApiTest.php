@@ -25,7 +25,7 @@ describe('Test la route pour créer une partie', function () {
             ],
         ];
 
-        $response = $this->postJson('/commander-ledger/utilisateurs/' . $utilisateur->id . '/parties', $partieInfo);
+        $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
 
         $response->assertStatus(200);
         $this->assertEquals($nbParties + 1, Partie::count());
@@ -46,7 +46,7 @@ describe('Test la route pour créer une partie', function () {
             ],
         ];
 
-        $response = $this->postJson('/commander-ledger/utilisateurs/' . $utilisateur->id . '/parties', $partieInfo);
+        $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
         $response->assertStatus(401);
         $this->assertEquals($nbParties, Partie::count());
         $this->assertEquals($nbPartiesDecks, PartieDeck::count());
@@ -67,7 +67,7 @@ describe('Test la route pour créer une partie', function () {
             ],
         ];
 
-        $response = $this->postJson('/commander-ledger/utilisateurs/' . $utilisateur->id . '/parties', $partieInfo);
+        $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
 
         $response->assertStatus(422);
         $this->assertEquals($nbParties, Partie::count());
@@ -81,7 +81,7 @@ describe('Test la route pour créer une partie', function () {
             ],
         ];
 
-        $response = $this->postJson('/commander-ledger/utilisateurs/' . $utilisateur->id . '/parties', $partieInfo);
+        $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
 
         $response->assertStatus(422);
         $this->assertEquals($nbParties, Partie::count());
@@ -96,7 +96,7 @@ describe('Test la route pour get les parties d\'un utilisateur', function () {
 
         $this->actingAs($utilisateur);
 
-        $response = $this->getJson('/commander-ledger/utilisateurs/' . $utilisateur->id . '/parties');
+        $response = $this->getJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties');
 
         $response->assertStatus(200);
     });
@@ -105,7 +105,40 @@ describe('Test la route pour get les parties d\'un utilisateur', function () {
         $this->seed();
         $utilisateur = Utilisateur::get()[0];
 
-        $response = $this->getJson('/commander-ledger/utilisateurs/' . $utilisateur->id . '/parties');
+        $response = $this->getJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties');
         $response->assertStatus(401);
+    });
+});
+
+describe('Test la route pour get une partie', function () {
+    it('peut get la partie', function () {
+        $this->seed();
+        $utilisateur = Utilisateur::get()[0];
+        $partie = Partie::get()[0];
+
+        $this->actingAs($utilisateur);
+
+        $response = $this->getJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties/'.$partie->id);
+
+        $response->assertStatus(200);
+    });
+
+    it('necessite d\'être authentifié', function () {
+        $this->seed();
+        $utilisateur = Utilisateur::get()[0];
+        $partie = Partie::get()[0];
+
+        $response = $this->getJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties/'.$partie->id);
+        $response->assertStatus(401);
+    });
+
+    it('retourne 404 si la partie n\'existe pas', function () {
+        $this->seed();
+        $utilisateur = Utilisateur::get()[0];
+
+        $this->actingAs($utilisateur);
+
+        $response = $this->getJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties/9385');
+        $response->assertStatus(404);
     });
 });

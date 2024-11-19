@@ -5,6 +5,9 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
+/**
+ * Collection des decks d<un utilisateur pour les parties
+ */
 class UtilisateurDeckCollection extends ResourceCollection
 {
     /**
