@@ -20,10 +20,10 @@ class PartieFactory extends Factory
     public function definition(): array
     {
         return [
-            'date' => '2020-01-01',
-            'nb_participants' => 3,
-            'termine' => true,
-            'createur_id' => Utilisateur::factory()->create()->id
+            'date' => $this->faker->date(),
+            'nb_participants' => $this->faker->numberBetween(1, 8),
+            'termine' => $this->faker->boolean(),
+            'createur_id' => Utilisateur::factory(),
         ];
     }
 }

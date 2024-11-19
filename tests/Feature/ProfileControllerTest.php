@@ -30,7 +30,7 @@ class ProfileControllerTest extends TestCase
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->getJson('/api/utilisateurs');
+        ])->getJson('/commander-ledger/utilisateurs');
 
         $response->assertStatus(200);
         $response->assertJsonStructure([

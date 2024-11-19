@@ -22,7 +22,7 @@ class PartieRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => ['required', 'date', 'date_format:YYYY/MM/DD'],
+            'date' => ['required', 'date', 'date_format:Y/m/d'],
             'terminee' => ['boolean'],
             'participants' => ['required', 'array'],
             'participants.*.deck_id' => ['required', 'integer', 'exists:decks,id'],

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Utilisateur;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,7 +24,7 @@ class DeckFactory extends Factory
             'nb_parties_perdues' =>$this->faker->numberBetween(1,10),
             'prix' =>$this->faker->numberBetween(1,200),
             'pourcentage_utilisation' =>$this->faker->numberBetween(1,100),
-            'utilisateur_id' =>$this->faker->numberBetween(1,10),
+            'utilisateur_id' => Utilisateur::factory(),
             'pourcentage_cartes_bleues' =>$this->faker->numberBetween(1,100),
             'pourcentage_cartes_jaunes' =>$this->faker->numberBetween(1,100),
             'pourcentage_cartes_rouges' =>$this->faker->numberBetween(1,100),

@@ -21,11 +21,11 @@ class UtilisateurFactory extends Factory
     public function definition()
     {
         return [
-            'nom' => fake()->name(),
-            'courriel' => fake()->unique()->safeEmail(),
-            'photo' => fake()->imageUrl(),
-            'prive' => fake()->boolean,
-            'password' => '$2y$10$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+            'nom' => $this->faker->unique()->name(),
+            'courriel' => $this->faker->unique()->email(),
+            'photo' => $this->faker->imageUrl(),
+            'prive' => $this->faker->boolean(),
+            'password' => $this->faker->password(),
         ];
     }
 
