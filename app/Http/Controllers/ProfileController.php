@@ -10,8 +10,13 @@ use App\Models\Utilisateur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
+use MongoDB\BSON\Int64;
+use phpDocumentor\Reflection\Type;
+use function Termwind\parse;
 
 /**
  * Controleur des utilisateurs
@@ -167,4 +172,5 @@ class ProfileController extends Controller
 
         return response()->json(['data' => $deck]);
     }
+
 }
