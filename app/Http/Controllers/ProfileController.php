@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PartieRequest;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Resources\PartieResource;
 use App\Http\Resources\UtilisateurCollection;
 use App\Http\Resources\UtilisateurResource;
+use App\Models\Deck;
+use App\Models\Partie;
+use App\Models\PartieDeck;
 use App\Models\Utilisateur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -13,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
+use function Sodium\add;
 
 /**
  * Controleur des utilisateurs
@@ -116,5 +122,49 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    public function storePartie($id, PartieRequest $request) : PartieResource
+    {
+        $request->validated();
+
+        $listeParticipants = $request->get('participants');
+        $nbParticippants = count($listeParticipants);
+        $terminee = $request->has('terminee') ? $request->get('terminee') : false;
+
+        $partie = Partie::create([
+            'date' => $request->get('date'),
+            'nb_participants' => $nbParticippants,
+            'teminee' => $terminee,
+            'createur_id' => $id,
+        ]);
+
+        $listePartiesDecks = [];
+
+        foreach ($listeParticipants as $participant) {
+            $deck = Deck::find($participant['deck_id']);
+
+            $partieDeck = PartieDeck::create([
+                'partie_id' => $partie->id,
+                'deck_id' => $participant['deck_id'],
+                'position' => in_array('position', $participant) ? $participant['position'] : null,
+            ]);
+
+            $listePartiesDecks[] = $partieDeck;
+
+            if ($terminee && $partieDeck->position == 1) {
+                $partie->update(['gagnant_id' => $deck->utilisateur->id]);
+            }
+        }
+
+        return new PartieResource([
+            'id' => $partie->id,
+            'date' => $partie->date,
+            'nb_participants' => $nbParticippants,
+            'terminee' => $terminee,
+            'createur_id' => $id,
+            'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
+            'participants' => $listePartiesDecks,
+        ]);
     }
 }
