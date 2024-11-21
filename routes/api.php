@@ -24,6 +24,8 @@ Route::prefix('utilisateurs')
         Route::get('/{id}/decks', [ProfileController::class, 'indexDeck']);
         // Route pour obtenir un deck
         Route::get('/{id}/decks/{deckId}', [ProfileController::class, 'showDeck']);
+        // Route pour supprimer un deck
+        Route::delete('/{id}/decks/{deckId}', [ProfileController::class, 'deleteDeck']);
 
         // Route pour ajouter une partie
         Route::post('/{id}/parties', [ProfileController::class, 'storePartie']);
@@ -31,10 +33,7 @@ Route::prefix('utilisateurs')
         Route::get('/{id}/parties', [ProfileController::class, 'indexPartie']);
         // Route pour get une partie
         Route::get('/{id}/parties/{partieId}', [ProfileController::class, 'showPartie']);
-
-        // Route pour supprimer un deck
-        Route::delete('/{id}/decks/{id}', [ProfileController::class, 'deleteDeck']);
-});
+    });
 
 Route::middleware(['api'])->group(function () {
     require __DIR__ . '/auth.php';

@@ -17,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 /**
  * Controleur des utilisateurs
@@ -292,10 +293,10 @@ class ProfileController extends Controller
      * @param int $id id du deck à supprimer
      * @return JsonResponse information du deck avant son anonymisation
      */
-    public function deleteDeck(int $id): JsonResponse {
-        $deck = Deck::findOrFail($id);
+    public function deleteDeck(int $id, int $deckId): JsonResponse {
+        $deck = Deck::findOrFail($deckId);
 
-        $deck->delete();
+        $deck->update(['supprime' => 1]);
         $deckNonModifie = $deck->replicate();
 
         $deck->update([
