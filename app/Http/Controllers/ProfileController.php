@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Resources\UtilisateurCollection;
 use App\Http\Resources\UtilisateurResource;
+use App\Models\Deck;
 use App\Models\Utilisateur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -116,5 +117,17 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    public function deleteDeck(int $id): JsonResponse {
+        $deck = Deck::findOrFail($id);
+
+        $deckNonModifie = $deck->replicate();
+
+        $deck->update([
+
+        ]);
+
+        $deck->delete();
     }
 }
