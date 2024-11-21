@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PartieRequest;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Resources\PartieCollection;
+use App\Http\Resources\PartieResource;
 use App\Http\Resources\UtilisateurCollection;
 use App\Http\Resources\UtilisateurResource;
 use App\Models\Ami;
+use App\Models\Deck;
+use App\Models\Partie;
+use App\Models\PartieDeck;
 use App\Models\Utilisateur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -14,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 /**
  * Controleur des utilisateurs
@@ -38,7 +45,7 @@ class ProfileController extends Controller
      * @param $id
      * @return JsonResponse
      */
-    public function showUtilisateur($id): JsonResponse
+    public function showUtilisateur(int $id): JsonResponse
     {
         $utilisateur = Utilisateur::findOrFail($id);
 
@@ -51,10 +58,10 @@ class ProfileController extends Controller
      * Modification d'un utilisateur
      *
      * @param Request $requete
-     * @param $id
+     * @param $id int
      * @return JsonResponse
      */
-    public function updateUtilisateur(Request $requete, $id): JsonResponse
+    public function updateUtilisateur(Request $requete, int $id): JsonResponse
     {
         $donneesValide = $requete->validate([
             'nom' => 'required|string|unique:utilisateurs,nom,' . $id,
@@ -80,7 +87,7 @@ class ProfileController extends Controller
      * @param $id
      * @return JsonResponse
      */
-    public function destroyUtilisateur($id): JsonResponse
+    public function destroyUtilisateur(int $id): JsonResponse
     {
         $utilisateur = Utilisateur::findOrFail($id);
 
@@ -106,11 +113,11 @@ class ProfileController extends Controller
     /**
      * Acceptation d'amitié
      *
-     * @param $id // id actuel, du receveur
-     * @param $id_ami // id du demandeur
+     * @param $id int Id actuel, du receveur
+     * @param $id_ami int Id du demandeur
      * @return JsonResponse
      */
-    public function acceptationAmi($id, $id_ami)
+    public function acceptationAmi(int $id, int $id_ami): JsonResponse
     {
         $user_2_id = $id;
 
@@ -135,11 +142,11 @@ class ProfileController extends Controller
     /**
      * Envoyer une demande d'ami
      *
-     * @param $id // id du demandeur
-     * @param $id_ami // id du receveur
+     * @param $id int Id du demandeur
+     * @param $id_ami int Id du receveur
      * @return JsonResponse
      */
-    public function envoyerDemandeAmi($id, $id_ami)
+    public function envoyerDemandeAmi(int $id, int $id_ami): JsonResponse
     {
         if ($id === $id_ami) {
             return response()->json(['message' => 'Tu ne peux pas envoyer une demande d\'ami à toi-même.'], 400);
@@ -175,7 +182,7 @@ class ProfileController extends Controller
      * @param $id
      * @return JsonResponse
      */
-    public function obtenirDemandeAmiEnAttente($id)
+    public function obtenirDemandeAmiEnAttente($id): JsonResponse
     {
         $requete = Ami::where('user_1_id', $id)
         ->where('invitation_accepter', false)
@@ -189,7 +196,7 @@ class ProfileController extends Controller
      * @param $id
      * @return JsonResponse
      */
-    public function obtenirAcceptationAmiEnAttente($id)
+    public function obtenirAcceptationAmiEnAttente($id): JsonResponse
     {
         $requete = Ami::where('user_2_id', $id)
         ->where('invitation_accepter', false)
@@ -205,7 +212,7 @@ class ProfileController extends Controller
      * @param $id_ami
      * @return JsonResponse
      */
-    public function EffacerDemandeOuAmitie($id, $id_ami)
+    public function EffacerDemandeOuAmitie($id, $id_ami): JsonResponse
     {
         $ami = Ami::where('user_1_id', $id)
             ->where('user_2_id', $id_ami)
@@ -234,5 +241,169 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Récupère-les decks d'un utilisateur
+     *
+     * @param $id int Id de l'utilisateur
+     * @return JsonResponse Les decks de l'utilisateur
+     */
+    public function indexDeck(int $id): JsonResponse
+    {
+        if (!ctype_digit((string)$id)) {
+            return response()->json([
+                'message' => 'Bad Request',
+            ], 400);
+        }
+
+        $utilisateur = Utilisateur::findOrFail($id);
+
+        $decks = Deck::where('utilisateur_id', $utilisateur->id)->get();
+
+        return response()->json([
+            'data' => $decks,
+        ]);
+    }
+
+    /**
+     * Récupère un deck d'un utilisateur
+     *
+     * @param $id int Id de l'utilisateur
+     * @param $deckId int id du deck
+     * @return JsonResponse Le deck de l'utilisateur
+     */
+    public function showDeck(int $id, int $deckId): JsonResponse
+    {
+        if (!ctype_digit((string)$id)) {
+            return response()->json([
+                'message' => 'Bad Request',
+            ], 400);
+        }
+
+        if (!ctype_digit((string)$deckId)) {
+            return response()->json([
+                'message' => 'Bad Request',
+            ], 400);
+        }
+
+        $deck = Deck::where('utilisateur_id', (int)$id)
+            ->where('id', (int)$deckId)
+            ->firstOrFail();
+
+        return response()->json(['data' => $deck]);
+    }
+
+
+    /**
+     * Création d'une partie
+     *
+     * @param int $id Id de l'utilisateur qui créer la partie
+     * @param PartieRequest $request Request avec les informations envoyées
+     *
+     * @return PartieResource Information sur la partie créée
+     */
+    public function storePartie(int $id, PartieRequest $request) : PartieResource
+    {
+        $request->validated();
+
+        $listeParticipants = $request->get('participants');
+        $nbParticippants = count($listeParticipants);
+        $terminee = $request->has('terminee') ? $request->get('terminee') : false;
+
+        $partie = Partie::create([
+            'date' => $request->get('date'),
+            'nb_participants' => $nbParticippants,
+            'terminee' => $terminee,
+            'createur_id' => $id,
+        ]);
+
+        $listePartiesDecks = [];
+
+        foreach ($listeParticipants as $participant) {
+            $deck = Deck::find($participant['deck_id']);
+
+            $partieDeck = PartieDeck::create([
+                'partie_id' => $partie->id,
+                'deck_id' => $participant['deck_id'],
+                'position' => in_array('position', $participant) ? $participant['position'] : null,
+            ]);
+
+            $listePartiesDecks[] = $partieDeck;
+
+            if ($terminee && $partieDeck->position == 1) {
+                $partie->update(['gagnant_id' => $deck->utilisateur->id]);
+            }
+        }
+
+        return new PartieResource([
+            'id' => $partie->id,
+            'date' => $partie->date,
+            'nb_participants' => $nbParticippants,
+            'terminee' => $terminee,
+            'createur_id' => $id,
+            'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
+            'participants' => $listePartiesDecks,
+        ]);
+    }
+
+    /**
+     * Récupère toutes les parties associées à un utilisateur
+     *
+     * @param int $id Id de l'utilisateur dont on veut les parties
+     *
+     * @return PartieCollection Toutes les parties auxquelles l'utilisateur est associé
+     */
+    public function indexPartie(int $id): PartieCollection
+    {
+        $decks = Deck::where('utilisateur_id', $id);
+        $partiesDecksUtilisateur = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->get();
+        $parties = Partie::find($partiesDecksUtilisateur->pluck('partie_id'));
+
+        $partiesDecksTotal = PartieDeck::whereIn('partie_id', $parties->pluck('id'))->get();
+
+        $information = [];
+
+        foreach ($parties as $partie) {
+            $information[] = [
+                'id' => $partie->id,
+                'date' => $partie->date,
+                'nb_participants' => $partie->nb_participants,
+                'terminee' => $partie->terminee,
+                'createur_id' => $partie->createur->id,
+                'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
+                'participants' => $partiesDecksTotal,
+            ];
+        }
+
+        return new PartieCollection($information);
+    }
+
+    /**
+     * Récupère une partie
+     *
+     * @param int $id Id de l'utilisateur qui a fait la requête
+     * @param int $partieId Id de la partie à récupérer
+     *
+     * @return PartieResource Partie trouvée
+     */
+    public function showPartie(int $id, int $partieId): PartieResource {
+        $partie = Partie::find($partieId);
+
+        if ($partie == null) {
+            throw new NotFoundResourceException();
+        }
+
+        $partiesDecks = PartieDeck::where('partie_id', $partieId)->get();
+
+        return new PartieResource([
+            'id' => $partie->id,
+            'date' => $partie->date,
+            'nb_participants' => $partie->nb_participants,
+            'terminee' => $partie->terminee,
+            'createur_id' => $partie->createur->id,
+            'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
+            'participants' => $partiesDecks,
+        ]);
     }
 }
