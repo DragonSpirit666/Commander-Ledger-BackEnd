@@ -16,6 +16,8 @@ describe('DeckGetsTest', function () {
 
         $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur->id}/decks");
 
+        dd($response->json());
+
         $response->assertStatus(200);
         $response->assertJsonFragment(['nom' => $deck->nom]);
         $response->assertJsonFragment(['nom' => $deck2->nom]);

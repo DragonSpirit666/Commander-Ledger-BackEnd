@@ -32,6 +32,16 @@ class Deck extends Model
     ];
 
     /**
+     * Les attributs qui doivent être cachés lors de la sérialisation.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
+    /**
      * Définie l'utilisateur qui possède le deck.
      * @return BelongsTo l'utilisateur qui possède le deck.
      */
