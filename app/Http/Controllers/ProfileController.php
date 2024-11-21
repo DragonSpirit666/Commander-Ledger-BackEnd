@@ -239,15 +239,37 @@ class ProfileController extends Controller
         ]);
     }
 
+    /**
+     * Supprime un deck (l'anonymise)
+     *
+     * @param int $id id du deck à supprimer
+     * @return JsonResponse information du deck avant son anonymisation
+     */
     public function deleteDeck(int $id): JsonResponse {
         $deck = Deck::findOrFail($id);
 
+        $deck->delete();
         $deckNonModifie = $deck->replicate();
 
         $deck->update([
-
+            'nom' => 'Supprimé',
+            'photo' => null,
+            'cartes' => "",
+            'nb_parties_gagnees' => 0,
+            'nb_parties_perdues' => 0,
+            'prix' => 0,
+            'salt' => null,
+            'pourcentage_utilisation' => 0,
+            'pourcentage_cartes_bleues' => 0,
+            'pourcentage_cartes_jaunes' => 0,
+            'pourcentage_cartes_rouges' => 0,
+            'pourcentage_cartes_noires' => 0,
+            'pourcentage_cartes_vertes' => 0,
+            'pourcentage_cartes_blanches' => 0
         ]);
 
-        $deck->delete();
+        return response()->json([
+            'data' => $deckNonModifie
+        ]);
     }
 }
