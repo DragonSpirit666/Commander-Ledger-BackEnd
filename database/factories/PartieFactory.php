@@ -22,7 +22,7 @@ class PartieFactory extends Factory
         return [
             'date' => $this->faker->date(),
             'nb_participants' => $this->faker->numberBetween(1, 8),
-            'termine' => $this->faker->boolean(),
+            'terminee' => $this->faker->boolean(),
             'createur_id' => Utilisateur::factory(),
         ];
     }

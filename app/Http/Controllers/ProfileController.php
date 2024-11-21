@@ -146,7 +146,7 @@ class ProfileController extends Controller
         $partie = Partie::create([
             'date' => $request->get('date'),
             'nb_participants' => $nbParticippants,
-            'teminee' => $terminee,
+            'terminee' => $terminee,
             'createur_id' => $id,
         ]);
 
@@ -201,7 +201,7 @@ class ProfileController extends Controller
                 'id' => $partie->id,
                 'date' => $partie->date,
                 'nb_participants' => $partie->nb_participants,
-                'terminee' => $partie->teminee,
+                'terminee' => $partie->terminee,
                 'createur_id' => $partie->createur->id,
                 'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
                 'participants' => $partiesDecksTotal,
