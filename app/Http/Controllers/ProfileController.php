@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AjoutDeckRequest;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Resources\UtilisateurCollection;
 use App\Http\Resources\UtilisateurResource;
+use App\Models\Deck;
 use App\Models\Utilisateur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -116,5 +118,19 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    public function ajouterDeck(AjoutDeckRequest $request, $id) : JsonResponse
+    {
+        $deck = Deck::create($request->validated());
+
+        //plus sur
+        $deck->utilisateur()->associate($id);
+
+        // faire les calcul
+
+
+        // voir pour assigner le deck a l'utilisateur si s'est pas fait automatiquement
+        // sinon créer les deck ressources pour le renvoyer en json et confirmer l'ajout
     }
 }

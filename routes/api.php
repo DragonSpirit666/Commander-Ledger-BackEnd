@@ -19,6 +19,8 @@ Route::prefix('utilisateurs')
         Route::put('/{id}', [ProfileController::class, 'updateUtilisateur']);
         // Route pour supprimer un utilisateur
         Route::delete('/{id}', [ProfileController::class, 'destroyUtilisateur']);
+
+        Route::post('/{id}', [ProfileController::class, 'ajouterDeck']);
 });
 
 Route::middleware(['api'])->group(function () {
