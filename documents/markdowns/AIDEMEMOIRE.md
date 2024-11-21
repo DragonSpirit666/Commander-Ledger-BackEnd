@@ -12,7 +12,10 @@
 ### Seeders
 - sail artisan make:seeder <NomTableSeeder> --> Pour ajouter des données à la base de données lors de sa création
     - Ex : sail artisan make:seeder UtilisateurSeeder
-- sail artisan db:seed --class=<NomTableSeeder> --> Peupler la bd avec le seeder
+```sh 
+  sail artisan db:seed --class=<NomTableSeeder>
+ ```
+- --> Peupler la bd avec le seeder
 - sail artisan db:seed --> Peupler la bd avec tous les seeders
 - sail artisan migrate:fresh --seed --> Refaire les migrations et seed la base de données
 
@@ -34,7 +37,7 @@
 ### Authentification
 - sail composer require laravel/breeze --dev --> Ajouter une dépendance a breeze
 - sail artisan breeze:install --> ajoute les ressources nécessaire pour la gestion de l'authentification
-    - Blade with Alpine
+    - Blade with Alpineg
     - No
     - PHPUnit
 

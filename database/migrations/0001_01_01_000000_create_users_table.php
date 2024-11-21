@@ -7,22 +7,27 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Générer la migration.
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('utilisateurs', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('nom')->unique();
+            $table->string('courriel')->unique();
+            $table->timestamp('courriel_verifier_a')->nullable();
             $table->string('password');
+            $table->string('photo')->nullable();
+            $table->boolean('prive')->default(false);
+            $table->integer('nb_parties_gagnees')->default(0);
+            $table->integer('nb_parties_perdues')->default(0);
+            $table->decimal('prix_total_decks', 10, 2)->default(0.00);
             $table->rememberToken();
             $table->timestamps();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
+            $table->string('courriel')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
