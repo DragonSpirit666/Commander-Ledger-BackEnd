@@ -26,6 +26,14 @@ Route::prefix('utilisateurs')
         Route::get('/{id}/decks/{deckId}', [ProfileController::class, 'showDeck']);
     });
 
+        // Route pour ajouter une partie
+        Route::post('/{id}/parties', [ProfileController::class, 'storePartie']);
+        // Route pour get toutes les parties d'un utilisateur
+        Route::get('/{id}/parties', [ProfileController::class, 'indexPartie']);
+        // Route pour get une partie
+        Route::get('/{id}/parties/{partieId}', [ProfileController::class, 'showPartie']);
+});
+
 Route::middleware(['api'])->group(function () {
     require __DIR__ . '/auth.php';
 });

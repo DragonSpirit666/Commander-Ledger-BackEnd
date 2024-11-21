@@ -6,14 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @property mixed $id
- * @property mixed $nom
- * @property mixed $courriel
- * @property mixed $photo
- * @property mixed $prive
- * @property mixed $nb_parties_gagnees
- * @property mixed $nb_parties_perdues
- * @property mixed $prix_total_decks
+ * Ressource d'un utilisateur
  */
 class UtilisateurResource extends JsonResource
 {
