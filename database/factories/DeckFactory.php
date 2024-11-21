@@ -25,7 +25,7 @@ class DeckFactory extends Factory
             'pourcentage_utilisation' =>$this->faker->numberBetween(1,100),
             'utilisateur_id' =>$this->faker->numberBetween(1,10),
             'pourcentage_cartes_bleues' =>$this->faker->numberBetween(1,100),
-            'pourcentage_cartes_jaunes' =>$this->faker->numberBetween(1,100),
+            'pourcentage_cartes_sans_couleur' =>$this->faker->numberBetween(1,100),
             'pourcentage_cartes_rouges' =>$this->faker->numberBetween(1,100),
             'pourcentage_cartes_noires' =>$this->faker->numberBetween(1,100),
             'pourcentage_cartes_vertes' =>$this->faker->numberBetween(1,100),

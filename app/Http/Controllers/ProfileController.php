@@ -148,15 +148,20 @@ class ProfileController extends Controller
         }
 
         $cartesDetails = array();
-        foreach ($cartesDetails as $cardName) {
-            // faire les call pour les cartes
+
+        foreach ($cartes as $cardName) {
+            $cartesDetails = AppelleAPICartes($cardName);
         }
 
+        $tauxCouleurs = CompterCouleur($cartesDetails);
+
+        /*
         foreach ($cartes as $cardName => $quantity) {
             // faire les call pour les cartes
         }
 
         // voir pour assigner le deck a l'utilisateur si s'est pas fait automatiquement
-        // sinon créer les deck ressources pour le renvoyer en json et confirmer l'ajout
+        // sinon créer les deck ressources pour le renvoyer en json et confirmer l'ajout*/
+        return response()->json($tauxCouleurs);
     }
 }
