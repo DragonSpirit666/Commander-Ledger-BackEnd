@@ -128,7 +128,33 @@ class ProfileController extends Controller
         $deck->utilisateur()->associate($id);
 
         // faire les calcul
+        $lignes = explode("\n", $deck->cartes);
 
+        $cartes = array();
+
+        foreach ($lignes as $line) {
+            $line = trim($line);
+            if (empty($line)) {
+                continue;
+            }
+
+            if (preg_match('/^(\d+)\s+(.*)$/', $line, $matches)) {
+                $quantity = intval($matches[1]);
+                $cardName = $matches[2];
+
+                // Step 3: Add to the associative array
+                $cartes[$cardName] = $quantity;
+            }
+        }
+
+        $cartesDetails = array();
+        foreach ($cartesDetails as $cardName) {
+            // faire les call pour les cartes
+        }
+
+        foreach ($cartes as $cardName => $quantity) {
+            // faire les call pour les cartes
+        }
 
         // voir pour assigner le deck a l'utilisateur si s'est pas fait automatiquement
         // sinon créer les deck ressources pour le renvoyer en json et confirmer l'ajout
