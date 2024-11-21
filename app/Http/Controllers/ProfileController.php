@@ -8,15 +8,19 @@ use App\Http\Resources\PartieCollection;
 use App\Http\Resources\PartieResource;
 use App\Http\Resources\UtilisateurCollection;
 use App\Http\Resources\UtilisateurResource;
+
 use App\Models\Deck;
 use App\Models\Partie;
 use App\Models\PartieDeck;
+use App\Models\Ami;
+
 use App\Models\Utilisateur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 /**
  * Controleur des utilisateurs
@@ -38,10 +42,10 @@ class ProfileController extends Controller
     /**
      * Renvoyer un utilisateur
      *
-     * @param $id
+     * @param $id int
      * @return JsonResponse
      */
-    public function showUtilisateur($id): JsonResponse
+    public function showUtilisateur(int $id): JsonResponse
     {
         $utilisateur = Utilisateur::findOrFail($id);
 
@@ -54,10 +58,10 @@ class ProfileController extends Controller
      * Modification d'un utilisateur
      *
      * @param Request $requete
-     * @param $id
+     * @param $id int
      * @return JsonResponse
      */
-    public function updateUtilisateur(Request $requete, $id): JsonResponse
+    public function updateUtilisateur(Request $requete, int $id): JsonResponse
     {
         $donneesValide = $requete->validate([
             'nom' => 'required|string|unique:utilisateurs,nom,' . $id,
@@ -80,10 +84,10 @@ class ProfileController extends Controller
     /**
      * Supression d'un utilisateur
      *
-     * @param $id
+     * @param $id int
      * @return JsonResponse
      */
-    public function destroyUtilisateur($id): JsonResponse
+    public function destroyUtilisateur(int $id): JsonResponse
     {
         $utilisateur = Utilisateur::findOrFail($id);
 
@@ -107,6 +111,123 @@ class ProfileController extends Controller
     }
 
     /**
+     * Acceptation d'amitié
+     *
+     * @param $id int Id actuel, du receveur
+     * @param $id_ami int Id du demandeur
+     * @return JsonResponse
+     */
+    public function acceptationAmi(int $id, int $id_ami): JsonResponse
+    {
+        $user_2_id = $id;
+
+        $ami = Ami::where('user_1_id', $id_ami)
+                    ->where('user_2_id', $user_2_id)
+                    ->first();
+
+        if (!$ami) {
+            return response()->json(['message' => 'Demande d\'ami n\'est pas trouvé.'], 404);
+        }
+
+        if ($ami->user_2_id != auth()->id()) {
+            return response()->json(['message' => 'N\'est pas autorisé à accepter cette requête.'], 403);
+        }
+
+        $ami->invitation_accepter = true;
+        $ami->save();
+
+        return response()->json(['message' => 'Demande d\'ami accepté.'], 200);
+    }
+
+    /**
+     * Envoyer une demande d'ami
+     *
+     * @param $id int Id du demandeur
+     * @param $id_ami int Id du receveur
+     * @return JsonResponse
+     */
+    public function envoyerDemandeAmi(int $id, int $id_ami): JsonResponse
+    {
+        if ($id === $id_ami) {
+            return response()->json(['message' => 'Tu ne peux pas envoyer une demande d\'ami à toi-même.'], 400);
+        }
+
+        // Vérification si l'amitié existe <3
+        $demandeExistante = Ami::where(function ($query) use ($id, $id_ami) {
+            $query->where('user_1_id', $id)
+                ->where('user_2_id', $id_ami);
+        })
+            ->orWhere(function ($query) use ($id, $id_ami) {
+                $query->where('user_1_id', $id_ami)
+                    ->where('user_2_id', $id);
+            })
+            ->first();
+
+        if ($demandeExistante) {
+            return response()->json(['message' => 'Une demande d\'ami existe déjà entre pour ces deux utilisateurs.'], 400);
+        }
+
+        Ami::create([
+            'user_1_id' => $id, // Le demandeur
+            'user_2_id' => $id_ami, // Le receveur
+            'invitation_accepter' => false,
+        ]);
+
+        return response()->json(['message' => 'Demande d\'ami envoyer avec succès.'], 201);
+    }
+
+    /**
+     * Obtenir liste de demande envoyer en attente d'acceptation
+     *
+     * @param $id int
+     * @return JsonResponse
+     */
+    public function obtenirDemandeAmiEnAttente(int $id): JsonResponse
+    {
+        $requete = Ami::where('user_1_id', $id)
+        ->where('invitation_accepter', false)
+        ->get();
+
+        return response()->json([$requete]);
+    }
+
+    /**
+     * Obtenir liste des acceptations demande d'amis en attente
+     * @param $id int
+     * @return JsonResponse
+     */
+    public function obtenirAcceptationAmiEnAttente(int $id): JsonResponse
+    {
+        $requete = Ami::where('user_2_id', $id)
+        ->where('invitation_accepter', false)
+        ->get();
+
+        return response()->json($requete);
+    }
+
+    /**
+     * Refuser une demande d'ami
+     *
+     * @param $id int
+     * @param $id_ami int
+     * @return JsonResponse
+     */
+    public function EffacerDemandeOuAmitie(int $id, int $id_ami)
+    {
+        $ami = Ami::where('user_1_id', $id)
+            ->where('user_2_id', $id_ami)
+            ->first();
+
+        if (!$ami) {
+            return response()->json(['message' => 'Demande d\'ami non trouvée ou déjà rejetée.'], 404);
+        }
+
+        $ami->delete();
+
+        return response()->json(['message' => 'Amitié détruit avec succès.']);
+    }
+
+    /**
      * Update the user's profile information.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
@@ -123,12 +244,12 @@ class ProfileController extends Controller
     }
 
     /**
-     * Récupère les decks d'un utilisateur
+     * Récupère-les decks d'un utilisateur
      *
-     * @param $id int id de l'utilisateur
-     * @return JsonResponse les decks de l'utilisateur
+     * @param $id int Id de l'utilisateur
+     * @return JsonResponse Les decks de l'utilisateur
      */
-    public function indexDeck($id): JsonResponse
+    public function indexDeck(int $id): JsonResponse
     {
         if (!ctype_digit((string)$id)) {
             return response()->json([
@@ -148,11 +269,11 @@ class ProfileController extends Controller
     /**
      * Récupère un deck d'un utilisateur
      *
-     * @param $id int id de l'utilisateur
-     * @param $deckId int id du deck
-     * @return JsonResponse le deck de l'utilisateur
+     * @param $id int Id de l'utilisateur
+     * @param $deckId int Id du deck
+     * @return JsonResponse Le deck de l'utilisateur
      */
-    public function showDeck($id, $deckId): JsonResponse
+    public function showDeck(int $id, int $deckId): JsonResponse
     {
         if (!ctype_digit((string)$id)) {
             return response()->json([
@@ -177,10 +298,10 @@ class ProfileController extends Controller
     /**
      * Création d'une partie
      *
-     * @param int $id id de l'utilisateur qui créer la partie
-     * @param PartieRequest $request request avec les informations envoyés
+     * @param int $id Id de l'utilisateur qui créer la partie
+     * @param PartieRequest $request Request avec les informations envoyées
      *
-     * @return PartieResource information sur la partie créée
+     * @return PartieResource Information sur la partie créée
      */
     public function storePartie(int $id, PartieRequest $request) : PartieResource
     {
@@ -229,9 +350,9 @@ class ProfileController extends Controller
     /**
      * Récupère toutes les parties associées à un utilisateur
      *
-     * @param int $id id de l'utilisateur dont on veut les parties
+     * @param int $id Id de l'utilisateur dont on veut les parties
      *
-     * @return PartieCollection toutes les parties auquelles l'utilisateur est associé
+     * @return PartieCollection Toutes les parties auquelles l'utilisateur est associé
      */
     public function indexPartie(int $id): PartieCollection
     {
@@ -261,10 +382,10 @@ class ProfileController extends Controller
     /**
      * Récupère une partie
      *
-     * @param int $id id de l'utilisateur qui a fait la requête
-     * @param int $partieId id de la partie à récupérer
+     * @param int $id Id de l'utilisateur qui a fait la requête
+     * @param int $partieId Id de la partie à récupérer
      *
-     * @return PartieResource partie trouvée
+     * @return PartieResource Partie trouvée
      */
     public function showPartie(int $id, int $partieId): PartieResource {
         $partie = Partie::find($partieId);
