@@ -24,7 +24,6 @@ Route::prefix('utilisateurs')
         Route::get('/{id}/decks', [ProfileController::class, 'indexDeck']);
         // Route pour obtenir un deck
         Route::get('/{id}/decks/{deckId}', [ProfileController::class, 'showDeck']);
-    });
 
         // Route pour ajouter une partie
         Route::post('/{id}/parties', [ProfileController::class, 'storePartie']);
