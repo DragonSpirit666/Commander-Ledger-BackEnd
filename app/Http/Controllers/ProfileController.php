@@ -15,13 +15,8 @@ use App\Models\Utilisateur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Model;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Translation\Exception\NotFoundResourceException;
-use function Sodium\add;
 
 /**
  * Controleur des utilisateurs
@@ -126,6 +121,58 @@ class ProfileController extends Controller
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
+
+    /**
+     * Récupère les decks d'un utilisateur
+     *
+     * @param $id int id de l'utilisateur
+     * @return JsonResponse les decks de l'utilisateur
+     */
+    public function indexDeck($id): JsonResponse
+    {
+        if (!ctype_digit((string)$id)) {
+            return response()->json([
+                'message' => 'Bad Request',
+            ], 400);
+        }
+
+        $utilisateur = Utilisateur::findOrFail($id);
+
+        $decks = Deck::where('utilisateur_id', $utilisateur->id)->get();
+
+        return response()->json([
+            'data' => $decks,
+        ]);
+    }
+
+    /**
+     * Récupère un deck d'un utilisateur
+     *
+     * @param $id int id de l'utilisateur
+     * @param $deckId int id du deck
+     * @return JsonResponse le deck de l'utilisateur
+     */
+    public function showDeck($id, $deckId): JsonResponse
+    {
+        if (!ctype_digit((string)$id)) {
+            return response()->json([
+                'message' => 'Bad Request',
+            ], 400);
+        }
+
+        if (!ctype_digit((string)$deckId)) {
+            return response()->json([
+                'message' => 'Bad Request',
+            ], 400);
+        }
+
+        $deck = Deck::where('utilisateur_id', (int)$id)
+            ->where('id', (int)$deckId)
+            ->firstOrFail();
+
+        return response()->json(['data' => $deck]);
+    }
+
 
     /**
      * Création d'une partie
