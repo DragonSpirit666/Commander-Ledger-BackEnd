@@ -21,7 +21,7 @@ describe('Test le model d\'une partie', function () {
         $valeursRemplissablesAttendues = [
             'date',
             'nb_participants',
-            'termine',
+            'terminee',
             'gagnant_id',
             'createur_id'
         ];
@@ -34,7 +34,7 @@ describe('Test le model d\'une partie', function () {
         $partie = Partie::create([
             'date' => '2020-01-01',
             'nb_participants' => 3,
-            'termine' => true,
+            'terminee' => true,
             'createur_id' => $utilisateur->id
         ]);
 
@@ -48,7 +48,7 @@ describe('Test le model d\'une partie', function () {
         $partie = Partie::create([
             'date' => '2020-01-01',
             'nb_participants' => 3,
-            'termine' => true,
+            'terminee' => true,
             'createur_id' => $utilisateur->id,
             'gagnant_id' => $utilisateur->id
         ]);
@@ -60,7 +60,7 @@ describe('Test le model d\'une partie', function () {
         $partie2 = Partie::create([
             'date' => '2020-01-01',
             'nb_participants' => 3,
-            'termine' => true,
+            'terminee' => true,
             'createur_id' => $utilisateur->id,
             'gagnant_id' => null
         ]);
@@ -83,7 +83,7 @@ describe('Test le model d\'une partie', function () {
         $partie = Partie::create([
             'date' => '2020-01-01',
             'nb_participants' => 3,
-            'termine' => true,
+            'terminee' => true,
             'createur_id' => $utilisateur->id
         ]);
 
@@ -91,7 +91,7 @@ describe('Test le model d\'une partie', function () {
             'id' => $partie->id,
             'date' => '2020-01-01',
             'nb_participants' => 3,
-            'termine' => true,
+            'terminee' => true,
             'createur_id' => $utilisateur->id,
             'gagnant_id' => null,
         ]);

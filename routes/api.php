@@ -20,6 +20,13 @@ Route::prefix('utilisateurs')
         // Route pour supprimer un utilisateur
         Route::delete('/{id}', [ProfileController::class, 'destroyUtilisateur']);
 
+        // Route pour ajouter une partie
+        Route::post('/{id}/parties', [ProfileController::class, 'storePartie']);
+        // Route pour get toutes les parties d'un utilisateur
+        Route::get('/{id}/parties', [ProfileController::class, 'indexPartie']);
+        // Route pour get une partie
+        Route::get('/{id}/parties/{partieId}', [ProfileController::class, 'showPartie']);
+
         // Route pour supprimer un deck
         Route::delete('/{id}/decks/{id}', [ProfileController::class, 'deleteDeck']);
 });
