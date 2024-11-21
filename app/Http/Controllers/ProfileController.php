@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Resources\UtilisateurCollection;
 use App\Http\Resources\UtilisateurResource;
+use App\Models\Ami;
 use App\Models\Utilisateur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -100,6 +101,123 @@ class ProfileController extends Controller
             'message' => 'Utilisateur anonymisé et désactivé avec succès.',
             'data' => new UtilisateurResource($utilisateurNonModifie),
         ]);
+    }
+
+    /**
+     * Acceptation d'amitié
+     *
+     * @param $id // id actuel, du receveur
+     * @param $id_ami // id du demandeur
+     * @return JsonResponse
+     */
+    public function acceptationAmi($id, $id_ami)
+    {
+        $user_2_id = $id;
+
+        $ami = Ami::where('user_1_id', $id_ami)
+                    ->where('user_2_id', $user_2_id)
+                    ->first();
+
+        if (!$ami) {
+            return response()->json(['message' => 'Demande d\'ami n\'est pas trouvé.'], 404);
+        }
+
+        if ($ami->user_2_id != auth()->id()) {
+            return response()->json(['message' => 'N\'est pas autorisé à accepter cette requête.'], 403);
+        }
+
+        $ami->invitation_accepter = true;
+        $ami->save();
+
+        return response()->json(['message' => 'Demande d\'ami accepté.'], 200);
+    }
+
+    /**
+     * Envoyer une demande d'ami
+     *
+     * @param $id // id du demandeur
+     * @param $id_ami // id du receveur
+     * @return JsonResponse
+     */
+    public function envoyerDemandeAmi($id, $id_ami)
+    {
+        if ($id === $id_ami) {
+            return response()->json(['message' => 'Tu ne peux pas envoyer une demande d\'ami à toi-même.'], 400);
+        }
+
+        // Vérification si l'amitié existe <3
+        $demandeExistante = Ami::where(function ($query) use ($id, $id_ami) {
+            $query->where('user_1_id', $id)
+                ->where('user_2_id', $id_ami);
+        })
+            ->orWhere(function ($query) use ($id, $id_ami) {
+                $query->where('user_1_id', $id_ami)
+                    ->where('user_2_id', $id);
+            })
+            ->first();
+
+        if ($demandeExistante) {
+            return response()->json(['message' => 'Une demande d\'ami existe déjà entre pour ces deux utilisateurs.'], 400);
+        }
+
+        Ami::create([
+            'user_1_id' => $id, // Le demandeur
+            'user_2_id' => $id_ami, // Le receveur
+            'invitation_accepter' => false,
+        ]);
+
+        return response()->json(['message' => 'Demande d\'ami envoyer avec succès.'], 201);
+    }
+
+    /**
+     * Obtenir liste de demande envoyer en attente d'acceptation
+     *
+     * @param $id
+     * @return JsonResponse
+     */
+    public function obtenirDemandeAmiEnAttente($id)
+    {
+        $requete = Ami::where('user_1_id', $id)
+        ->where('invitation_accepter', false)
+        ->get();
+
+        return response()->json([$requete]);
+    }
+
+    /**
+     * Obtenir liste des acceptations demande d'amis en attente
+     * @param $id
+     * @return JsonResponse
+     */
+    public function obtenirAcceptationAmiEnAttente($id)
+    {
+        $requete = Ami::where('user_2_id', $id)
+        ->where('invitation_accepter', false)
+        ->get();
+
+        return response()->json($requete);
+    }
+
+    /**
+     * Refuser une demande d'ami
+     *
+     * @param $id
+     * @param $id_ami
+     * @return JsonResponse
+     */
+    public function EffacerDemandeOuAmitie($id, $id_ami)
+    {
+        $ami = Ami::where('user_1_id', $id)
+            ->where('user_2_id', $id_ami)
+            ->first();
+
+        if (!$ami) {
+            return response()->json(['message' => 'Demande d\'ami non trouvée ou déjà rejetée.'], 404);
+        }
+
+        $ami->delete();
+
+        return response()->json(['message' => 'Amitié détruit avec succès.']);
     }
 
     /**

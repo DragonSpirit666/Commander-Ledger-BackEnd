@@ -58,4 +58,22 @@ class Utilisateur extends Authenticatable
             'prix_total_decks' => 'decimal:2',
         ];
     }
+
+    public function EnvoiDemandeAmi()
+    {
+        return $this->hasMany(Ami::class, 'user_1_id');
+    }
+
+    public function RecevoirDemandeAmi()
+    {
+        return $this->hasMany(Ami::class, 'user_2_id');
+    }
+
+    public function amisAccepter()
+    {
+        return $this->friendsSent()->where('invitation_accepter', true)
+            ->orWhereHas('RecevoirDemandeAmi', function ($query) {
+                $query->where('invitation_accepter', true);
+            });
+    }
 }
