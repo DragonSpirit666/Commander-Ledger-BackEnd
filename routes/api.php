@@ -21,7 +21,7 @@ Route::prefix('utilisateurs')
         Route::delete('/{id}', [ProfileController::class, 'destroyUtilisateur']);
 
         // Route pour accepter demande d'amis
-        Route::post('/{id}/amis/accepter/{id_ami}', [ProfileController::class, 'acceptationAmi']);
+        Route::post('/{id}/amis/acceptation/{id_ami}', [ProfileController::class, 'acceptationAmi']);
         // Route pour créer une demande d'amis
         Route::post('/{id}/amis/envoyer/{id_ami}', [ProfileController::class, 'envoyerDemandeAmi']);
         // Route pour obtenir les demandes envoyées par un utilisateur
