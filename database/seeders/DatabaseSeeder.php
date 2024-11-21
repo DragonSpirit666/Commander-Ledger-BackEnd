@@ -11,6 +11,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([UtilisateurSeeder::class, PartieSeeder::class, DeckSeeder::class, PartieDeckSeeder::class]);
+        $this->call([UtilisateurSeeder::class, PartieSeeder::class, DeckSeeder::class, PartieDeckSeeder::class, AmiSeeder::class]);
     }
 }
