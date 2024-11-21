@@ -16,7 +16,7 @@ class Partie extends Model
     protected $fillable = [
         'date',
         'nb_participants',
-        'termine',
+        'terminee',
         'gagnant_id',
         'createur_id'
     ];
