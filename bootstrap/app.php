@@ -1,8 +1,10 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -24,5 +26,14 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->report(function (NotFoundResourceException $e) {
+            return response()->json(['message' => 'La ressource n\'existe pas'], 404);
+        });
+        $exceptions->render(function (NotFoundResourceException $e, Request $request) {
+            if ($request->is('commander-ledger/*')) {
+                return response()->json([
+                    'message' => __('exceptions.not_found')
+                ], 404);
+            }
+        });
     })->create();
