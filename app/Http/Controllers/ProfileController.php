@@ -17,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 /**
  * Controleur des utilisateurs
@@ -283,6 +284,40 @@ class ProfileController extends Controller
             'createur_id' => $partie->createur->id,
             'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
             'participants' => $partiesDecks,
+        ]);
+    }
+
+    /**
+     * Supprime un deck (l'anonymise)
+     *
+     * @param int $id id du deck à supprimer
+     * @return JsonResponse information du deck avant son anonymisation
+     */
+    public function deleteDeck(int $id, int $deckId): JsonResponse {
+        $deck = Deck::findOrFail($deckId);
+
+        $deck->update(['supprime' => 1]);
+        $deckNonModifie = $deck->replicate();
+
+        $deck->update([
+            'nom' => 'Supprimé',
+            'photo' => null,
+            'cartes' => "",
+            'nb_parties_gagnees' => 0,
+            'nb_parties_perdues' => 0,
+            'prix' => 0,
+            'salt' => null,
+            'pourcentage_utilisation' => 0,
+            'pourcentage_cartes_bleues' => 0,
+            'pourcentage_cartes_jaunes' => 0,
+            'pourcentage_cartes_rouges' => 0,
+            'pourcentage_cartes_noires' => 0,
+            'pourcentage_cartes_vertes' => 0,
+            'pourcentage_cartes_blanches' => 0
+        ]);
+
+        return response()->json([
+            'data' => $deckNonModifie
         ]);
     }
 }
