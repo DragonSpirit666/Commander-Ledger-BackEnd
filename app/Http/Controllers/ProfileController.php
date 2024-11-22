@@ -167,8 +167,7 @@ class ProfileController extends Controller
             ], 400);
         }
 
-        $deck = Deck::where('utilisateur_id', (int)$id)
-            ->where('id', (int)$deckId)
+        $deck = Deck::where('id', (int)$deckId)
             ->firstOrFail();
 
         return response()->json(['data' => $deck]);
