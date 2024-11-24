@@ -8,6 +8,7 @@ use App\Http\Resources\PartieCollection;
 use App\Http\Resources\PartieResource;
 use App\Http\Resources\UtilisateurCollection;
 use App\Http\Resources\UtilisateurResource;
+use App\Logique\LogiqueUtilisateur;
 use App\Models\Deck;
 use App\Models\Partie;
 use App\Models\PartieDeck;
@@ -34,8 +35,7 @@ class ProfileController extends Controller
         $utilisateurs = Utilisateur::withTrashed()->get();
 
         foreach ($utilisateurs as $utilisateur) {
-            CalculerPrixTotalsDecksUtilisateur::Calc($utilisateur);
-            dd($utilisateur);
+            LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
         }
 
         return response()->json(new UtilisateurCollection($utilisateurs));
@@ -50,6 +50,7 @@ class ProfileController extends Controller
     public function showUtilisateur($id): JsonResponse
     {
         $utilisateur = Utilisateur::findOrFail($id);
+        LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
 
         return response()->json([
             'data' => new UtilisateurResource($utilisateur),
@@ -77,6 +78,8 @@ class ProfileController extends Controller
         $utilisateur = Utilisateur::findOrFail($id);
         $utilisateur->update($donneesValide);
 
+        LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
+
         return response()->json([
             'message' => 'Utilisateur mis à jour avec succès',
             'data' => new UtilisateurResource($utilisateur),
@@ -92,6 +95,7 @@ class ProfileController extends Controller
     public function destroyUtilisateur($id): JsonResponse
     {
         $utilisateur = Utilisateur::findOrFail($id);
+        LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
 
         $utilisateurNonModifie = $utilisateur->replicate();
 
@@ -110,22 +114,6 @@ class ProfileController extends Controller
             'message' => 'Utilisateur anonymisé et désactivé avec succès.',
             'data' => new UtilisateurResource($utilisateurNonModifie),
         ]);
-    }
-
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-
-        $request->user()->save();
-
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
@@ -192,6 +180,7 @@ class ProfileController extends Controller
         $request->validated();
 
         $listeParticipants = $request->get('participants');
+
         $nbParticippants = count($listeParticipants);
         $terminee = $request->has('terminee') ? $request->get('terminee') : false;
 
