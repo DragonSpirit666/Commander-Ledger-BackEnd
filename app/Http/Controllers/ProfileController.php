@@ -33,6 +33,11 @@ class ProfileController extends Controller
     {
         $utilisateurs = Utilisateur::withTrashed()->get();
 
+        foreach ($utilisateurs as $utilisateur) {
+            CalculerPrixTotalsDecksUtilisateur::Calc($utilisateur);
+            dd($utilisateur);
+        }
+
         return response()->json(new UtilisateurCollection($utilisateurs));
     }
 
