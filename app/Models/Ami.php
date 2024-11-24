@@ -12,18 +12,29 @@ class Ami extends Model
     protected $table = "amis";
 
     protected $fillable = [
-        'user_1_id',
-        'user_2_id',
+        'utilisateur_demandeur_id',
+        'utilisateur_receveur_id',
         'invitation_accepter',
     ];
 
+
+    /**
+     * * Relation avec l'utilisateur demandeur.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function utilisateur1()
     {
-        return $this->belongsTo(Utilisateur::class, 'user_1_id');
+        return $this->belongsTo(Utilisateur::class, 'utilisateur_demandeur_id');
     }
 
+    /**
+     * * Relation avec l'utilisateur receveur.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function utilisateur2()
     {
-        return $this->belongsTo(Utilisateur::class, 'user_2_id');
+        return $this->belongsTo(Utilisateur::class, 'utilisateur_receveur_id');
     }
 }

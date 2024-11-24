@@ -19,19 +19,19 @@ describe('Test le modèle Ami', function () {
     test('Le modèle a les attributs fillable corrects', function () {
         $ami = new Ami();
         $valeursRemplissablesAttendues = [
-            'user_1_id',
-            'user_2_id',
+            'utilisateur_demandeur_id',
+            'utilisateur_receveur_id',
             'invitation_accepter'
         ];
 
         expect($ami->getFillable())->toEqual($valeursRemplissablesAttendues);
     });
 
-    test('Le modèle a une relation avec un utilisateur "user_1"', function () {
+    test('Le modèle a une relation avec un utilisateur "utilisateur_demandeur"', function () {
         $utilisateur = Utilisateur::factory()->create();
         $ami = Ami::create([
-            'user_1_id' => $utilisateur->id,
-            'user_2_id' => Utilisateur::factory()->create()->id,
+            'utilisateur_demandeur_id' => $utilisateur->id,
+            'utilisateur_receveur_id' => Utilisateur::factory()->create()->id,
             'invitation_accepter' => false
         ]);
 
@@ -40,11 +40,11 @@ describe('Test le modèle Ami', function () {
             ->and($ami->utilisateur1->id)->toBe($utilisateur->id);
     });
 
-    test('Le modèle a une relation avec un utilisateur "user_2"', function () {
+    test('Le modèle a une relation avec un utilisateur "utilisateur_receveur"', function () {
         $utilisateur = Utilisateur::factory()->create();
         $ami = Ami::create([
-            'user_1_id' => $utilisateur->id,
-            'user_2_id' => Utilisateur::factory()->create()->id,
+            'utilisateur_demandeur_id' => $utilisateur->id,
+            'utilisateur_receveur_id' => Utilisateur::factory()->create()->id,
             'invitation_accepter' => false
         ]);
 
@@ -56,8 +56,8 @@ describe('Test le modèle Ami', function () {
         $utilisateur1 = Utilisateur::factory()->create();
         $utilisateur2 = Utilisateur::factory()->create();
         $ami = Ami::create([
-            'user_1_id' => $utilisateur1->id,
-            'user_2_id' => $utilisateur2->id,
+            'utilisateur_demandeur_id' => $utilisateur1->id,
+            'utilisateur_receveur_id' => $utilisateur2->id,
             'invitation_accepter' => false
         ]);
 
@@ -66,8 +66,8 @@ describe('Test le modèle Ami', function () {
         $ami->save();
 
         $this->assertDatabaseHas('amis', [
-            'user_1_id' => $utilisateur1->id,
-            'user_2_id' => $utilisateur2->id,
+            'utilisateur_demandeur_id' => $utilisateur1->id,
+            'utilisateur_receveur_id' => $utilisateur2->id,
             'invitation_accepter' => true
         ]);
     });
@@ -77,8 +77,8 @@ describe('Test le modèle Ami', function () {
             Ami::create();
         } catch (QueryException $e) {
             $this->assertDatabaseMissing('amis', [
-                'user_1_id' => null,
-                'user_2_id' => null
+                'utilisateur_demandeur_id' => null,
+                'utilisateur_receveur_id' => null
             ]);
         }
     });
@@ -88,14 +88,14 @@ describe('Test le modèle Ami', function () {
         $utilisateur2 = Utilisateur::factory()->create();
 
         $ami = Ami::create([
-            'user_1_id' => $utilisateur1->id,
-            'user_2_id' => $utilisateur2->id,
+            'utilisateur_demandeur_id' => $utilisateur1->id,
+            'utilisateur_receveur_id' => $utilisateur2->id,
             'invitation_accepter' => false
         ]);
 
         $this->assertDatabaseHas('amis', [
-            'user_1_id' => $utilisateur1->id,
-            'user_2_id' => $utilisateur2->id,
+            'utilisateur_demandeur_id' => $utilisateur1->id,
+            'utilisateur_receveur_id' => $utilisateur2->id,
             'invitation_accepter' => false
         ]);
     });

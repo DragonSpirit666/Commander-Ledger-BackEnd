@@ -115,28 +115,39 @@ class ProfileController extends Controller
      *
      * @param $id int Id actuel, du receveur
      * @param $id_ami int Id du demandeur
+     * @param Request $requete Obtient le bool avec la réponse pour la demande d'amitié
      * @return JsonResponse
      */
-    public function acceptationAmi(int $id, int $id_ami): JsonResponse
+    public function acceptationAmi(int $id, int $id_ami, Request $requete): JsonResponse
     {
-        $user_2_id = $id;
+        $accepter = $requete->get('invitation_accepter', null);
 
-        $ami = Ami::where('user_1_id', $id_ami)
-                    ->where('user_2_id', $user_2_id)
+        if (!is_bool($accepter)) {
+            return response()->json(['message' => 'Le paramètre "invitation_accepter" est requis et doit être un booléen.'], 400);
+        }
+
+        $ami = Ami::where('utilisateur_demandeur_id', $id_ami)
+                    ->where('utilisateur_receveur_id', $id)
                     ->first();
 
         if (!$ami) {
             return response()->json(['message' => 'Demande d\'ami n\'est pas trouvé.'], 404);
         }
 
-        if ($ami->user_2_id != auth()->id()) {
-            return response()->json(['message' => 'N\'est pas autorisé à accepter cette requête.'], 403);
+        if ($ami->utilisateur_receveur_id !== auth()->id()) {
+            return response()->json(['message' => 'Non autorisé à accepter ou refuser cette demande.'], 403);
         }
 
-        $ami->invitation_accepter = true;
-        $ami->save();
-
-        return response()->json(['message' => 'Demande d\'ami accepté.'], 200);
+        if ($accepter) {
+            // Accepter la demande
+            $ami->invitation_accepter = true;
+            $ami->save();
+            return response()->json(['message' => 'Demande d\'ami acceptée.'], 200);
+        } else {
+            // Refuser la demande
+            $ami->delete();
+            return response()->json(['message' => 'Demande d\'ami rejetée.'], 200);
+        }
     }
 
     /**
@@ -154,12 +165,12 @@ class ProfileController extends Controller
 
         // Vérification si l'amitié existe <3
         $demandeExistante = Ami::where(function ($query) use ($id, $id_ami) {
-            $query->where('user_1_id', $id)
-                ->where('user_2_id', $id_ami);
+            $query->where('utilisateur_demandeur_id', $id)
+                ->where('utilisateur_receveur_id', $id_ami);
         })
             ->orWhere(function ($query) use ($id, $id_ami) {
-                $query->where('user_1_id', $id_ami)
-                    ->where('user_2_id', $id);
+                $query->where('utilisateur_demandeur_id', $id_ami)
+                    ->where('utilisateur_receveur_id', $id);
             })
             ->first();
 
@@ -168,8 +179,8 @@ class ProfileController extends Controller
         }
 
         Ami::create([
-            'user_1_id' => $id, // Le demandeur
-            'user_2_id' => $id_ami, // Le receveur
+            'utilisateur_demandeur_id' => $id,
+            'utilisateur_receveur_id' => $id_ami,
             'invitation_accepter' => false,
         ]);
 
@@ -184,7 +195,7 @@ class ProfileController extends Controller
      */
     public function obtenirDemandeAmiEnAttente(int $id): JsonResponse
     {
-        $requete = Ami::where('user_1_id', $id)
+        $requete = Ami::where('utilisateur_demandeur_id', $id)
         ->where('invitation_accepter', false)
         ->get();
 
@@ -198,7 +209,7 @@ class ProfileController extends Controller
      */
     public function obtenirAcceptationAmiEnAttente(int $id): JsonResponse
     {
-        $requete = Ami::where('user_2_id', $id)
+        $requete = Ami::where('utilisateur_receveur_id', $id)
         ->where('invitation_accepter', false)
         ->get();
 
@@ -212,10 +223,10 @@ class ProfileController extends Controller
      * @param $id_ami int
      * @return JsonResponse
      */
-    public function EffacerDemandeOuAmitie(int $id, int $id_ami)
+    public function EffacerAmitie(int $id, int $id_ami)
     {
-        $ami = Ami::where('user_1_id', $id)
-            ->where('user_2_id', $id_ami)
+        $ami = Ami::where('utilisateur_demandeur_id', $id)
+            ->where('utilisateur_receveur_id', $id_ami)
             ->first();
 
         if (!$ami) {

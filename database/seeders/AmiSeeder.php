@@ -16,17 +16,20 @@ class AmiSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = Utilisateur::factory(10)->create();
+        $users = Utilisateur::all();
 
-        foreach ($users as $user1) {
-            foreach ($users as $user2) {
-                if ($user1->id !== $user2->id) {
-                    Ami::factory()->create([
-                        'user_1_id' => $user1->id,
-                        'user_2_id' => $user2->id,
-                    ]);
+        Ami::factory()
+            ->count(10)
+            ->create()
+            ->each(function ($ami) use ($users) {
+                $ami->utilisateur_demandeur_id = $users->random()->id;
+                $ami->utilisateur_receveur_id = $users->random()->id;
+
+                while ($ami->utilisateur_demandeur_id === $ami->utilisateur_receveur_id) {
+                    $ami->utilisateur_receveur_id = $users->random()->id;
                 }
-            }
-        }
+
+                $ami->save();
+            });
     }
 }

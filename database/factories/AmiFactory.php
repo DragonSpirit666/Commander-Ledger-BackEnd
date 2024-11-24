@@ -18,8 +18,8 @@ class AmiFactory extends Factory
     public function definition()
     {
         return [
-            'user_1_id' => Utilisateur::factory(),
-            'user_2_id' => Utilisateur::factory(),
+            'utilisateur_demandeur_id' => Utilisateur::factory(),
+            'utilisateur_receveur_id' => Utilisateur::factory(),
             'invitation_accepter' => $this->faker->boolean(50),
         ];
     }

@@ -29,7 +29,7 @@ Route::prefix('utilisateurs')
         // Route pour obtenir les demandes reçues par un utilisateur
         Route::get('/{id}/amis/acceptations-en-attente', [ProfileController::class, 'obtenirAcceptationAmiEnAttente']);
         // Effacer une demande ou une amitié existante
-        Route::delete('/{id}/amis/effacer/{id_ami}', [ProfileController::class, 'EffacerDemandeOuAmitie']);
+        Route::delete('/{id}/amis/effacer/{id_ami}', [ProfileController::class, 'EffacerAmitie']);
 
         // Route pour la liste des decks
         Route::get('/{id}/decks', [ProfileController::class, 'indexDeck']);
