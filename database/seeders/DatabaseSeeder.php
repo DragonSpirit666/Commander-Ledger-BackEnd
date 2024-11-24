@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Deck;
 use App\Models\Utilisateur;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -15,9 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         // Utilisateur::factory(10)->create();
 
-        Utilisateur::factory()->create([
-            'name' => 'Test Utilisateur',
-            'email' => 'test@example.com',
-        ]);
+        Utilisateur::factory()->count(10)->create();
+        Deck::factory()->count(10)->create();
     }
 }

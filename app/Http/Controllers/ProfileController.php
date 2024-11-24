@@ -8,6 +8,7 @@ use App\Http\Resources\UtilisateurCollection;
 use App\Http\Resources\UtilisateurResource;
 use App\Models\Deck;
 use App\Models\Utilisateur;
+use http\Message;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
-
+use App\Http\Logique\APIExterne;
+use App\Http\Logique\CompterCouleur;
 /**
  * Controleur des utilisateurs
  */
@@ -122,13 +124,18 @@ class ProfileController extends Controller
 
     public function ajouterDeck(AjoutDeckRequest $request, $id) : JsonResponse
     {
-        $deck = Deck::create($request->validated());
+        // Find the utilisateur (user) or fail
+        $data = $request->validated();
 
+        // Add utilisateur_id to the data
+        $data['utilisateur_id'] = (int)$id;
+
+        $deck = Deck::create($data);
         //plus sur
         $deck->utilisateur()->associate($id);
 
         // faire les calcul
-        $lignes = explode("\n", $deck->cartes);
+        $lignes = explode("\n", $data["cartes"]);
 
         $cartes = array();
 
@@ -147,21 +154,57 @@ class ProfileController extends Controller
             }
         }
 
+
         $cartesDetails = array();
 
-        foreach ($cartes as $cardName) {
-            $cartesDetails = AppelleAPICartes($cardName);
-        }
-
-        $tauxCouleurs = CompterCouleur($cartesDetails);
-
-        /*
         foreach ($cartes as $cardName => $quantity) {
-            // faire les call pour les cartes
+            $apiResponse = APIExterne::AppelleAPICartes($cardName);
+            // Decode the JSON response into an array
+            $decodedResponse = json_decode($apiResponse, true);
+
+            // Append the response to the $cartesDetails array
+            $cartesDetails[] = [
+                'carte_nom' => $cardName,
+                'quantité' => $quantity,
+                'couleurs' => $decodedResponse['colors'],
+                'prix' => $decodedResponse['prices']["usd"]
+            ];
         }
 
-        // voir pour assigner le deck a l'utilisateur si s'est pas fait automatiquement
+        $tauxCouleurs = json_decode(CompterCouleur::Compte($cartesDetails));
+
+        foreach ($tauxCouleurs as $couleur => $prc) {
+            switch ($couleur) {
+                case "Blaqnches":
+                    $deck->pourcentage_cartes_blanches = $prc;
+                    break;
+                case "Bleus":
+                    $deck->pourcentage_cartes_bleues = $prc;
+                    break;
+                case "SansCouleur":
+                    $deck->pourcentage_cartes_sans_couleur = $prc;
+                    break;
+                case "Rouges":
+                    $deck->pourcentage_cartes_rouges = $prc;
+                    break;
+                case "Noirs":
+                    $deck->pourcentage_cartes_noires = $prc;
+                    break;
+                case "Vertes":
+                    $deck->pourcentage_cartes_vertes = $prc;
+                    break;
+            }
+        }
+
+        $prixTotal = 0;
+        foreach ($cartesDetails as $carte) {
+            $prixTotal += $carte['prix'];
+        }
+
+        $deck->prix = $prixTotal;
+
+        $deck->save();
         // sinon créer les deck ressources pour le renvoyer en json et confirmer l'ajout*/
-        return response()->json($tauxCouleurs);
+        return response()->json([$deck]);
     }
 }
