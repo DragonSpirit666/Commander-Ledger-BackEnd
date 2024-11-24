@@ -24,6 +24,8 @@ Route::prefix('utilisateurs')
         Route::post('/{id}/amis/acceptation/{id_ami}', [ProfileController::class, 'acceptationAmi']);
         // Route pour créer une demande d'amis
         Route::post('/{id}/amis/envoyer/{id_ami}', [ProfileController::class, 'envoyerDemandeAmi']);
+        // Route pour obtenir la liste des amis d'un utilisateur
+        Route::get('/{id}/amis', [ProfileController::class, 'obtenirListeAmis']);
         // Route pour obtenir les demandes envoyées par un utilisateur
         Route::get('/{id}/amis/demandes-en-attente', [ProfileController::class, 'obtenirDemandeAmiEnAttente']);
         // Route pour obtenir les demandes reçues par un utilisateur

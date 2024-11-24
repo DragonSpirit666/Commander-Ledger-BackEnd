@@ -35,9 +35,9 @@ describe('Test le modèle Ami', function () {
             'invitation_accepter' => false
         ]);
 
-        expect($ami->utilisateur1())->toBeInstanceOf(BelongsTo::class)
-            ->and($ami->utilisateur1)->toBeInstanceOf(Utilisateur::class)
-            ->and($ami->utilisateur1->id)->toBe($utilisateur->id);
+        expect($ami->utilisateurDemandeur())->toBeInstanceOf(BelongsTo::class)
+            ->and($ami->utilisateurDemandeur)->toBeInstanceOf(Utilisateur::class)
+            ->and($ami->utilisateurDemandeur->id)->toBe($utilisateur->id);
     });
 
     test('Le modèle a une relation avec un utilisateur "utilisateur_receveur"', function () {
@@ -48,16 +48,16 @@ describe('Test le modèle Ami', function () {
             'invitation_accepter' => false
         ]);
 
-        expect($ami->utilisateur2())->toBeInstanceOf(BelongsTo::class)
-            ->and($ami->utilisateur2)->toBeInstanceOf(Utilisateur::class);
+        expect($ami->utilisateurReceveur())->toBeInstanceOf(BelongsTo::class)
+            ->and($ami->utilisateurReceveur)->toBeInstanceOf(Utilisateur::class);
     });
 
     test('Le modèle accepte l\'invitation d\'ami', function () {
-        $utilisateur1 = Utilisateur::factory()->create();
-        $utilisateur2 = Utilisateur::factory()->create();
+        $utilisateurDemandeur = Utilisateur::factory()->create();
+        $utilisateurReceveur = Utilisateur::factory()->create();
         $ami = Ami::create([
-            'utilisateur_demandeur_id' => $utilisateur1->id,
-            'utilisateur_receveur_id' => $utilisateur2->id,
+            'utilisateur_demandeur_id' => $utilisateurDemandeur->id,
+            'utilisateur_receveur_id' => $utilisateurReceveur->id,
             'invitation_accepter' => false
         ]);
 
@@ -66,8 +66,8 @@ describe('Test le modèle Ami', function () {
         $ami->save();
 
         $this->assertDatabaseHas('amis', [
-            'utilisateur_demandeur_id' => $utilisateur1->id,
-            'utilisateur_receveur_id' => $utilisateur2->id,
+            'utilisateur_demandeur_id' => $utilisateurDemandeur->id,
+            'utilisateur_receveur_id' => $utilisateurReceveur->id,
             'invitation_accepter' => true
         ]);
     });
@@ -84,19 +84,53 @@ describe('Test le modèle Ami', function () {
     });
 
     it('créée une demande d\'ami avec les bonnes valeurs', function () {
-        $utilisateur1 = Utilisateur::factory()->create();
-        $utilisateur2 = Utilisateur::factory()->create();
+        $utilisateurDemandeur = Utilisateur::factory()->create();
+        $utilisateurReceveur = Utilisateur::factory()->create();
 
         $ami = Ami::create([
-            'utilisateur_demandeur_id' => $utilisateur1->id,
-            'utilisateur_receveur_id' => $utilisateur2->id,
+            'utilisateur_demandeur_id' => $utilisateurDemandeur->id,
+            'utilisateur_receveur_id' => $utilisateurReceveur->id,
             'invitation_accepter' => false
         ]);
 
         $this->assertDatabaseHas('amis', [
-            'utilisateur_demandeur_id' => $utilisateur1->id,
-            'utilisateur_receveur_id' => $utilisateur2->id,
+            'utilisateur_demandeur_id' => $utilisateurDemandeur->id,
+            'utilisateur_receveur_id' => $utilisateurReceveur->id,
             'invitation_accepter' => false
         ]);
+    });
+
+    it('récupère les amis acceptés', function () {
+        $this->seed();
+
+        $utilisateur = Utilisateur::first();
+        $ami1 = Utilisateur::skip(1)->first();
+        $ami2 = Utilisateur::skip(2)->first();
+        $nonAmi = Utilisateur::factory()->create();
+
+        Ami::create([
+            'utilisateur_demandeur_id' => $utilisateur->id,
+            'utilisateur_receveur_id' => $ami1->id,
+            'invitation_accepter' => true,
+        ]);
+
+        Ami::create([
+            'utilisateur_demandeur_id' => $utilisateur->id,
+            'utilisateur_receveur_id' => $ami2->id,
+            'invitation_accepter' => true,
+        ]);
+
+        Ami::create([
+            'utilisateur_demandeur_id' => $utilisateur->id,
+            'utilisateur_receveur_id' => $nonAmi->id,
+            'invitation_accepter' => false,
+        ]);
+
+        $amis = $utilisateur->amisAccepter();
+
+
+        expect($amis->contains(fn($ami) => $ami->utilisateur_receveur_id === $ami1->id))->toBeTrue();
+        expect($amis->contains(fn($ami) => $ami->utilisateur_receveur_id === $ami2->id))->toBeTrue();
+        expect($amis->contains(fn($ami) => $ami->utilisateur_receveur_id === $nonAmi->id))->toBeFalse();
     });
 });

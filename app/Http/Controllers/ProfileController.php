@@ -188,6 +188,22 @@ class ProfileController extends Controller
     }
 
     /**
+     * Récupérer la liste des amis d'un utilisateur.
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function obtenirListeAmis(int $id): JsonResponse
+    {
+        $utilisateur = Utilisateur::findOrFail($id);
+
+        $amis = $utilisateur->amisAccepter();
+
+        return response()->json($amis, 200);
+    }
+
+
+    /**
      * Obtenir liste de demande envoyer en attente d'acceptation
      *
      * @param $id int

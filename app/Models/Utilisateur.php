@@ -61,19 +61,22 @@ class Utilisateur extends Authenticatable
 
     public function EnvoiDemandeAmi()
     {
-        return $this->hasMany(Ami::class, 'user_1_id');
+        return $this->hasMany(Ami::class, 'utilisateur_demandeur_id');
     }
 
     public function RecevoirDemandeAmi()
     {
-        return $this->hasMany(Ami::class, 'user_2_id');
+        return $this->hasMany(Ami::class, 'utilisateur_receveur_id');
     }
 
     public function amisAccepter()
     {
-        return $this->friendsSent()->where('invitation_accepter', true)
-            ->orWhereHas('RecevoirDemandeAmi', function ($query) {
-                $query->where('invitation_accepter', true);
-            });
+        $amisDemandeur = $this->EnvoiDemandeAmi()->where('invitation_accepter', true)->get();
+        $amisReceveur = $this->RecevoirDemandeAmi()->where('invitation_accepter', true)->get();
+
+        $amis = $amisDemandeur->merge($amisReceveur)->unique('id');;
+
+        return $amis;
     }
+
 }

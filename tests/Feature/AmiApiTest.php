@@ -31,22 +31,45 @@ it('accepte une demande d\'ami', function () {
         $this->assertEquals(true, $ami->invitation_accepter);
 });
 
-it('envoie une demande d\'ami avec succès', function () {
-    $utilisateur1 = Utilisateur::factory()->create(); // Demandeur
-    $utilisateur2 = Utilisateur::factory()->create(); // Receveur
+it('obtient la liste d\'amis d\'un utlisateur', function () {
+    $this->seed();
 
-    $this->actingAs($utilisateur1);
+    $utilisateur = Utilisateur::first();
+    $ami1 = Utilisateur::skip(1)->first();
+    $ami2 = Utilisateur::skip(2)->first();
+    $nonAmi = Utilisateur::factory()->create();
 
-    $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur1->id.'/amis/envoyer/'.$utilisateur2->id);
+    $this->actingAs($utilisateur);
 
-    $response->assertStatus(201)
-        ->assertJson(['message' => 'Demande d\'ami envoyer avec succès.']);
-
-    $this->assertDatabaseHas('amis', [
-        'utilisateur_demandeur_id' => $utilisateur1->id,
-        'utilisateur_receveur_id' => $utilisateur2->id,
+    Ami::create([
+        'utilisateur_demandeur_id' => $utilisateur->id,
+        'utilisateur_receveur_id' => $ami1->id,
+        'invitation_accepter' => true,
     ]);
+
+    Ami::create([
+        'utilisateur_demandeur_id' => $utilisateur->id,
+        'utilisateur_receveur_id' => $ami2->id,
+        'invitation_accepter' => true,
+    ]);
+
+    Ami::create([
+        'utilisateur_demandeur_id' => $utilisateur->id,
+        'utilisateur_receveur_id' => $nonAmi->id,
+        'invitation_accepter' => false,
+    ]);
+
+    $response = $this->getJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/amis');
+
+    $response->assertStatus(200);
+    $amis = $response->json();
+
+    $this->assertCount(2, $amis);
+    $this->assertTrue(collect($amis)->contains('utilisateur_receveur_id', $ami1->id));
+    $this->assertTrue(collect($amis)->contains('utilisateur_receveur_id', $ami2->id));
+    $this->assertFalse(collect($amis)->contains('utilisateur_receveur_id', $nonAmi->id));
 });
+
 
 it('ne permet pas d\'envoyer une demande d\'ami à soi-même', function () {
     $utilisateur1 = Utilisateur::factory()->create();

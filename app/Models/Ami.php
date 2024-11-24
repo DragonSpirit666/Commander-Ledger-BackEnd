@@ -23,7 +23,7 @@ class Ami extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function utilisateur1()
+    public function utilisateurDemandeur()
     {
         return $this->belongsTo(Utilisateur::class, 'utilisateur_demandeur_id');
     }
@@ -33,7 +33,7 @@ class Ami extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function utilisateur2()
+    public function utilisateurReceveur()
     {
         return $this->belongsTo(Utilisateur::class, 'utilisateur_receveur_id');
     }
