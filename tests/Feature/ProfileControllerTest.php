@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use function PHPUnit\Framework\assertEquals;
+use function PHPUnit\Framework\assertTrue;
 
 class ProfileControllerTest extends TestCase
 {
@@ -59,17 +61,23 @@ class ProfileControllerTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-        $response->assertJsonFragment(['message' => 'Utilisateur mis à jour avec succès']);
+        $utilisateur = Utilisateur::find($this->utilisateur->id);
+        assertEquals('Nouveau Nom', $utilisateur->nom);
+        assertEquals('nouveau@exemple.com', $utilisateur->courriel);
+        assertTrue($utilisateur->prive);
     }
 
     public function testPeutSupprimerUnUtilisateur()
     {
+        // TODO fail parce qu'on peut pu get le user quand yer soft delete comme ca
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
         ])->deleteJson('/commander-ledger/utilisateurs/' . $this->utilisateur->id);
 
         $response->assertStatus(200);
-        $response->assertJsonFragment(['message' => 'Utilisateur anonymisé et désactivé avec succès.']);
+
+        $utilisateur = Utilisateur::find($this->utilisateur->id);
+        assertEquals('Inconnu'.$this->utilisateur->id, $utilisateur->nom);
     }
 }
 

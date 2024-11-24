@@ -73,7 +73,6 @@ class ProfileController extends Controller
         $utilisateur->update($donneesValide);
 
         return response()->json([
-            'message' => 'Utilisateur mis à jour avec succès',
             'data' => new UtilisateurResource($utilisateur),
         ]);
     }
@@ -102,7 +101,6 @@ class ProfileController extends Controller
         $utilisateur->delete();
 
         return response()->json([
-            'message' => 'Utilisateur anonymisé et désactivé avec succès.',
             'data' => new UtilisateurResource($utilisateurNonModifie),
         ]);
     }
