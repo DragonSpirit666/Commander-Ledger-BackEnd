@@ -4,6 +4,12 @@ namespace App\Http\Logique;
 use Illuminate\Database\Eloquent\Casts\Json;
 class APIExterne
 {
+    /**
+     * Appelle l'API Scryfall pour obtenir des informations sur une carte spécifique.
+     *
+     * @param string $nomCarte Le nom exact de la carte à rechercher.
+     * @return bool|array|string Renvoie une string JSON en cas de succès, un tableau avec les détails de l'erreur en cas d'échec, ou false en cas d'erreur inconnue.
+     */
     public static function AppelleAPICartes(string $nomCarte): bool|array|string
     {
         $url = 'https://api.scryfall.com/cards/named';

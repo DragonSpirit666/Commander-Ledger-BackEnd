@@ -126,43 +126,49 @@ class ProfileController extends Controller
     {
         // Find the utilisateur (user) or fail
         $data = $request->validated();
-
-        // Add utilisateur_id to the data
         $data['utilisateur_id'] = (int)$id;
 
-        $deck = Deck::create($data);
-        //plus sur
-        $deck->utilisateur()->associate($id);
 
         // faire les calcul
         $lignes = explode("\n", $data["cartes"]);
-
         $cartes = array();
+
 
         foreach ($lignes as $line) {
             $line = trim($line);
-            if (empty($line)) {
-                continue;
+            if (empty($line)) continue;
+
+            if (!preg_match('/^(\d+)\s+(.*)$/', $line, $matches)) {
+                return response()->json([
+                    'error' => "Invalid card format: '{$line}'. Expected format: '<quantity> <card name>'."
+                ], 400);
             }
 
-            if (preg_match('/^(\d+)\s+(.*)$/', $line, $matches)) {
-                $quantity = intval($matches[1]);
-                $cardName = $matches[2];
-
-                // Step 3: Add to the associative array
-                $cartes[$cardName] = $quantity;
-            }
+            $quantity = intval($matches[1]);
+            $cardName = $matches[2];
+            $cartes[$cardName] = $quantity;
         }
 
+        if (empty($cartes)) {
+            return response()->json(['error' => 'Le paramêtre cartes dois contenir aumoin une carte valide.'], 400);
+        }
+
+        $deck = Deck::create($data);
+        $deck->utilisateur()->associate($id);
 
         $cartesDetails = array();
-
         foreach ($cartes as $cardName => $quantity) {
             $apiResponse = APIExterne::AppelleAPICartes($cardName);
             // Decode the JSON response into an array
             $decodedResponse = json_decode($apiResponse, true);
 
-            // Append the response to the $cartesDetails array
+            // A TESTER AVEC LES ERREUR ENVOYER PAR SCRYFALL
+            if (empty($decodedResponse) || !isset($decodedResponse['prices']['usd'])) {
+                return response()->json([
+                    'error' => "Failed to fetch details for card: '{$cardName}'."
+                ], 400);
+            }
+
             $cartesDetails[] = [
                 'carte_nom' => $cardName,
                 'quantité' => $quantity,
@@ -196,6 +202,7 @@ class ProfileController extends Controller
             }
         }
 
+        // CONTINUER ICI AVEC CHAT
         $prixTotal = 0;
         foreach ($cartesDetails as $carte) {
             $prixTotal += $carte['prix'];

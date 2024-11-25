@@ -4,6 +4,12 @@ namespace App\Http\Logique;
 use Illuminate\Database\Eloquent\Casts\Json;
 
 class CompterCouleur {
+    /**
+     * Compte les cartes par couleur et renvoie les pourcentages de chaque couleur.
+     *
+     * @param array $cartesDetails Un tableau contenant les détails des cartes, y compris les couleurs et les quantités.
+     * @return string Renvoie une string JSON contenant les pourcentages de chaque couleur.
+     */
     public static function Compte(array $cartesDetails) : string
     {
         $statsCouleur = [
