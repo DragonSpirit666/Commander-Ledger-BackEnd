@@ -205,6 +205,6 @@ class ProfileController extends Controller
 
         $deck->save();
         // sinon créer les deck ressources pour le renvoyer en json et confirmer l'ajout*/
-        return response()->json([$deck]);
+        return response()->json([$deck], 201);
     }
 }
