@@ -20,8 +20,8 @@ it('accepte une demande d\'ami', function () {
 
     $this->actingAs($utilisateur2);
 
-    $response = $this->postJson(
-        '/commander-ledger/utilisateurs/'.$utilisateur2->id.'/amis/acceptation/'.$utilisateur1->id,
+    $response = $this->putJson(
+        '/commander-ledger/utilisateurs/'.$utilisateur2->id.'/amis/demandes/'.$utilisateur1->id,
         ['invitation_accepter' => true]);
 
     $response->assertStatus(200)
@@ -75,7 +75,7 @@ it('ne permet pas d\'envoyer une demande d\'ami à soi-même', function () {
     $utilisateur1 = Utilisateur::factory()->create();
     $this->actingAs($utilisateur1);
 
-    $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur1->id.'/amis/envoyer/'.$utilisateur1->id);
+    $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur1->id.'/amis/demandes/'.$utilisateur1->id);
 
     $response->assertStatus(400)
         ->assertJson(['message' => 'Tu ne peux pas envoyer une demande d\'ami à toi-même.']);
@@ -93,7 +93,7 @@ it('retourne la liste des demandes d\'ami en attente', function () {
 
     $this->actingAs($utilisateur1);
 
-    $response = $this->getJson('/commander-ledger/utilisateurs/'.$utilisateur1->id.'/amis/demandes-en-attente');
+    $response = $this->getJson('/commander-ledger/utilisateurs/'.$utilisateur1->id.'/amis/demandes');
 
     $response->assertStatus(200)
         ->assertJsonCount(1);
@@ -129,7 +129,7 @@ it('supprime une demande d\'ami ou une amitié', function () {
 
     $this->actingAs($utilisateur1);
 
-    $response = $this->deleteJson('/commander-ledger/utilisateurs/'.$utilisateur1->id.'/amis/effacer/'.$utilisateur2->id);
+    $response = $this->deleteJson('/commander-ledger/utilisateurs/'.$utilisateur1->id.'/amis/'.$utilisateur2->id);
 
     $response->assertStatus(200)
         ->assertJson(['message' => 'Amitié détruit avec succès.']);
