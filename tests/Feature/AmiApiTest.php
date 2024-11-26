@@ -99,7 +99,8 @@ it('retourne la liste des demandes d\'ami en attente', function () {
         ->assertJsonCount(1);
 });
 
-it('retourne la liste des demandes d\'acceptation d\'ami en attente', function () {
+// Test pas utiliser puisque route effacer
+/*it('retourne la liste des demandes d\'acceptation d\'ami en attente', function () {
     $utilisateur1 = Utilisateur::factory()->create(); // Demandeur
     $utilisateur2 = Utilisateur::factory()->create(); // Receveur
 
@@ -115,7 +116,7 @@ it('retourne la liste des demandes d\'acceptation d\'ami en attente', function (
 
     $response->assertStatus(200)
         ->assertJsonCount(1);
-});
+});*/
 
 it('supprime une demande d\'ami ou une amitié', function () {
     $utilisateur1 = Utilisateur::factory()->create(); // Demandeur

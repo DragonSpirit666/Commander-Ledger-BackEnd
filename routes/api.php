@@ -23,13 +23,11 @@ Route::prefix('utilisateurs')
         // Route pour accepter demande d'amis
         Route::put('/{id}/amis/demandes/{id_ami}', [ProfileController::class, 'acceptationAmi']);
         // Route pour créer une demande d'amis
-        Route::post('/{id}/amis/demandes/{id_ami}', [ProfileController::class, 'envoyerDemandeAmi']);
+        Route::post('/{id}/amis/demandes', [ProfileController::class, 'envoyerDemandeAmi']);
         // Route pour obtenir la liste des amis d'un utilisateur
         Route::get('/{id}/amis', [ProfileController::class, 'obtenirListeAmis']);
         // Route pour obtenir les demandes envoyées par un utilisateur
-        Route::get('/{id}/amis/demandes', [ProfileController::class, 'obtenirDemandeAmiEnAttente']);
-        // Route pour obtenir les demandes reçues par un utilisateur
-        Route::get('/{id}/amis/acceptations-en-attente', [ProfileController::class, 'obtenirAcceptationAmiEnAttente']);
+        Route::get('/{id}/amis/demandes', [ProfileController::class, 'notificationDemandeAmi']);
         // Effacer une demande ou une amitié existante
         Route::delete('/{id}/amis/{id_ami}', [ProfileController::class, 'EffacerAmitie']);
 

@@ -157,8 +157,10 @@ class ProfileController extends Controller
      * @param $id_ami int Id du receveur
      * @return JsonResponse
      */
-    public function envoyerDemandeAmi(int $id, int $id_ami): JsonResponse
+    public function envoyerDemandeAmi(int $id, Request $requete): JsonResponse
     {
+        $id_ami = $requete->get('utilisateur_receveur_id', null);
+
         if ($id === $id_ami) {
             return response()->json(['message' => 'Tu ne peux pas envoyer une demande d\'ami à toi-même.'], 400);
         }
@@ -209,7 +211,7 @@ class ProfileController extends Controller
      * @param $id int
      * @return JsonResponse
      */
-    public function obtenirDemandeAmiEnAttente(int $id): JsonResponse
+    public function notificationDemandeAmi(int $id): JsonResponse
     {
         $requete = Ami::where('utilisateur_demandeur_id', $id)
         ->where('invitation_accepter', false)
@@ -219,6 +221,8 @@ class ProfileController extends Controller
     }
 
     /**
+     * FONCTION NON UTLISÉ, ROUTE EFFACER
+     *
      * Obtenir liste des acceptations demande d'amis en attente
      * @param $id int
      * @return JsonResponse
