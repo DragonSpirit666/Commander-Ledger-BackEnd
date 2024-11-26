@@ -171,3 +171,98 @@ describe("Test la route pour get les invitations à des parties", function() {
        $response->assertStatus(200)->assertJsonCount($invitations->count() - 1, 'data');
    });
 });
+
+describe("Test la route pour répondre à une invitation de partie", function() {
+    test("Peut accetper une invitation", function() {
+        $this->seed();
+        $this->actingAs(Utilisateur::get()[0]);
+
+        $partieDeck = PartieDeck::get()[0];
+        $utilisateurNotifier = Deck::find($partieDeck->deck_id)->utilisateur;
+
+        $decks = Deck::where('utilisateur_id', $utilisateurNotifier->id);
+        $invitationsAvant = PartieDeck::wherein('deck_id', $decks->pluck('id'))
+            ->where('validee', true)
+            ->where('refusee', false)
+            ->get();
+
+        $response = $this->putJson('/commander-ledger/utilisateurs/'.$utilisateurNotifier->id.'/parties/invitations/'.$partieDeck->id, ['invitation_acceptee' => true]);
+        $response->assertStatus(200);
+
+        $invitationsApres = PartieDeck::wherein('deck_id', $decks->pluck('id'))
+            ->where('validee', true)
+            ->where('refusee', false)
+            ->get();
+        assertEquals($invitationsAvant->count() + 1, count($invitationsApres));
+    });
+
+    test("Peut refuser une invitation", function() {
+        $this->seed();
+        $this->actingAs(Utilisateur::get()[0]);
+
+        $partieDeck = PartieDeck::get()[0];
+        $utilisateurNotifier = Deck::find($partieDeck->deck_id)->utilisateur;
+
+        $decks = Deck::where('utilisateur_id', $utilisateurNotifier->id);
+        $invitationsAvant = PartieDeck::wherein('deck_id', $decks->pluck('id'))
+            ->where('validee', true)
+            ->where('refusee', false)
+            ->get();
+
+        $response = $this->putJson('/commander-ledger/utilisateurs/'.$utilisateurNotifier->id.'/parties/invitations/'.$partieDeck->id, ['invitation_acceptee' => false]);
+        $response->assertStatus(200);
+
+        $invitationsApres = PartieDeck::wherein('deck_id', $decks->pluck('id'))
+            ->where('validee', true)
+            ->where('refusee', false)
+            ->get();
+        assertEquals(count($invitationsAvant), count($invitationsApres));
+    });
+
+    test("Ne peut répondre à une invitation déjà validée", function() {
+        $this->seed();
+        $this->actingAs(Utilisateur::get()[0]);
+
+        $partieDeck = PartieDeck::get()[0];
+        $utilisateurNotifier = Deck::find($partieDeck->deck_id)->utilisateur;
+
+        $decks = Deck::where('utilisateur_id', $utilisateurNotifier->id);
+        $invitationsAvant = PartieDeck::wherein('deck_id', $decks->pluck('id'))
+            ->where('validee', true)
+            ->where('refusee', false)
+            ->get();
+
+        $this->putJson('/commander-ledger/utilisateurs/'.$utilisateurNotifier->id.'/parties/invitations/'.$partieDeck->id, ['invitation_acceptee' => false]);
+        $response = $this->putJson('/commander-ledger/utilisateurs/'.$utilisateurNotifier->id.'/parties/invitations/'.$partieDeck->id, ['invitation_acceptee' => true]);
+        $response->assertStatus(404);
+
+        $invitationsApres = PartieDeck::wherein('deck_id', $decks->pluck('id'))
+            ->where('validee', true)
+            ->where('refusee', false)
+            ->get();
+        assertEquals(count($invitationsAvant), count($invitationsApres));
+    });
+
+    test("Le champ invitation_acceptee est requis", function() {
+        $this->seed();
+        $this->actingAs(Utilisateur::get()[0]);
+
+        $partieDeck = PartieDeck::get()[0];
+        $utilisateurNotifier = Deck::find($partieDeck->deck_id)->utilisateur;
+
+        $decks = Deck::where('utilisateur_id', $utilisateurNotifier->id);
+        $invitationsAvant = PartieDeck::wherein('deck_id', $decks->pluck('id'))
+            ->where('validee', true)
+            ->where('refusee', false)
+            ->get();
+
+        $response = $this->putJson('/commander-ledger/utilisateurs/'.$utilisateurNotifier->id.'/parties/invitations/'.$partieDeck->id);
+        $response->assertStatus(422);
+
+        $invitationsApres = PartieDeck::wherein('deck_id', $decks->pluck('id'))
+            ->where('validee', true)
+            ->where('refusee', false)
+            ->get();
+        assertEquals(count($invitationsAvant), count($invitationsApres));
+    });
+});
