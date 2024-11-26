@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Logique\CreationDeck;
 use App\Http\Requests\AjoutDeckRequest;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Resources\UtilisateurCollection;
@@ -128,7 +129,8 @@ class ProfileController extends Controller
         $data = $request->validated();
         $data['utilisateur_id'] = (int)$id;
 
-
+        $deck = CreationDeck::creerDeck($data, $id);
+        /*
         // faire les calcul
         $lignes = explode("\n", $data["cartes"]);
         $cartes = array();
@@ -211,6 +213,7 @@ class ProfileController extends Controller
         $deck->prix = $prixTotal;
 
         $deck->save();
+        */
         // sinon créer les deck ressources pour le renvoyer en json et confirmer l'ajout*/
         return response()->json([$deck], 201);
     }

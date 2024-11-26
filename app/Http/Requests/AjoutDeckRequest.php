@@ -21,6 +21,7 @@ class AjoutDeckRequest extends FormRequest
      */
     public function rules(): array
     {
+        // mettre les types pour les paramètres pouvant êtrte envoyé
         return [
             'nom' => ['required'],
             'cartes' => ['required']
