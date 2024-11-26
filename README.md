@@ -23,3 +23,9 @@
 ## Fermer le projet
 - Exécuter la commmande dans le dossier du projet --> sail down
  OU fermer manuellement le container sur Docker desktop
+
+## Testing
+./vendor/bin/sail artisan migrate:fresh --env=testing
+./vendor/bin/sail artisan test
+
+
