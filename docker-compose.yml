@@ -24,8 +24,8 @@ services:
         networks:
             - sail
         depends_on:
-            - mysql
             - mailpit
+            - mysql
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:
