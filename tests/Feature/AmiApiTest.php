@@ -75,7 +75,7 @@ it('ne permet pas d\'envoyer une demande d\'ami à soi-même', function () {
     $utilisateur1 = Utilisateur::factory()->create();
     $this->actingAs($utilisateur1);
 
-    $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur1->id.'/amis/demandes/'.$utilisateur1->id);
+    $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur1->id.'/amis/demandes', ['utilisateur_receveur_id' => $utilisateur1->id]);
 
     $response->assertStatus(400)
         ->assertJson(['message' => 'Tu ne peux pas envoyer une demande d\'ami à toi-même.']);

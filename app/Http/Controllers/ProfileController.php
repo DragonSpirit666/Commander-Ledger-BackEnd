@@ -160,7 +160,8 @@ class ProfileController extends Controller
      */
     public function envoyerDemandeAmi(int $id, Request $requete): JsonResponse
     {
-        $id_ami = $requete->get('utilisateur_receveur_id', null);
+        $requete->validate(['utilisateur_receveur_id' => ['required', 'int', 'exists:utilisateurs,id']]);
+        $id_ami = $requete->get('utilisateur_receveur_id');
 
         if ($id === $id_ami) {
             return response()->json(['message' => 'Tu ne peux pas envoyer une demande d\'ami à toi-même.'], 400);
