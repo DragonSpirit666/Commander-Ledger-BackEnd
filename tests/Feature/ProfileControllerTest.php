@@ -69,7 +69,6 @@ class ProfileControllerTest extends TestCase
 
     public function testPeutSupprimerUnUtilisateur()
     {
-        // TODO fail parce qu'on peut pu get le user quand yer soft delete comme ca
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
         ])->deleteJson('/commander-ledger/utilisateurs/' . $this->utilisateur->id);
