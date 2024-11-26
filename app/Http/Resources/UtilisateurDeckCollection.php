@@ -19,6 +19,7 @@ class UtilisateurDeckCollection extends ResourceCollection
     {
         return $this->collection->map(function ($utilisateurDeck) {
             return [
+                'invitation_id' => $utilisateurDeck->id,
                 'utilisateur' => [
                     'id' => $utilisateurDeck->deck->utilisateur->id,
                     'nom' => $utilisateurDeck->deck->utilisateur->nom,

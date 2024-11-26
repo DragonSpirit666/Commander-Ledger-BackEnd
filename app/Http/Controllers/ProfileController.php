@@ -337,6 +337,7 @@ class ProfileController extends Controller
      */
     public function storePartie(int $id, PartieRequest $request) : PartieResource
     {
+        // Personne qui creer partie a automatiquement valider l'invitation
         $request->validated();
 
         $listeParticipants = $request->get('participants');
@@ -389,7 +390,7 @@ class ProfileController extends Controller
     public function indexPartie(int $id): PartieCollection
     {
         $decks = Deck::where('utilisateur_id', $id);
-        $partiesDecksUtilisateur = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->get();
+        $partiesDecksUtilisateur = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->where('validee', true)->where('refusee', false)->get();
         $parties = Partie::find($partiesDecksUtilisateur->pluck('partie_id'));
 
         $partiesDecksTotal = PartieDeck::whereIn('partie_id', $parties->pluck('id'))->get();
@@ -467,6 +468,42 @@ class ProfileController extends Controller
         }
 
         return new PartieCollection($information);
+    }
+
+    /**
+     * Update l'invitation à une partie avec la réponse (acceptée ou non) et update les statistiques utilisateurs et decks
+     * nécessaire selon la réponse.
+     *
+     * @param int $id id de l'utilisateur qui reçoit l'invitation
+     * @param int $invitationId id de l'invitation (PartieDeck)
+     * @param Request $request request contenant la réponse (acceptee)
+     *
+     * @return JsonResponse
+     */
+    public function acceptationInvitationPartie(int $id, int $invitationId, Request $request) {
+        $request->validate(['invitation_acceptee' =>  ['required', 'boolean']]);
+        $partieDeck = PartieDeck::findorfail($invitationId);
+        if ($partieDeck->validee) {
+            return response()->json(['message' => 'Cette invitation n\'existe pas.'], 404);
+        }
+
+        Utilisateur::findorfail($id);
+
+        if ($request->invitation_acceptee == 1) {
+            if ($partieDeck->position != null) {
+                $deck = Deck::find($partieDeck->deck_id);
+                $deck->update([
+                    'nb_parties_gagnees' => $deck->nb_parties_gagnees + ($partieDeck->position == 1 ? 1 : 0),
+                    'nb_parties_perdues' => $deck->nb_parties_perdues + ($partieDeck->position == 1 ? 0 : 1),
+                ]);
+            }
+
+            $partieDeck->update(['validee' => true, 'refusee' => false]);
+            return response()->json(['message' => 'Invitation à la partie acceptée.']);
+        } else {
+            $partieDeck->update(['validee' => true, 'refusee' => true]);
+            return response()->json(['message' => 'Invitation à la partie refusée.']);
+        }
     }
 
     /**

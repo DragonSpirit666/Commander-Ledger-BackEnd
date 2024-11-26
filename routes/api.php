@@ -44,6 +44,8 @@ Route::prefix('utilisateurs')
         Route::get('/{id}/parties', [ProfileController::class, 'indexPartie']);
         // Route pour get les invitations à une partie
         Route::get("/{id}/parties/invitations", [ProfileController::class, 'notificationInvitationPartie']);
+        // Route pour répondre à une invitation de partie
+        Route::put("/{id}/parties/invitations/{invitationId}", [ProfileController::class, 'acceptationInvitationPartie']);
         // Route pour get une partie
         Route::get('/{id}/parties/{partieId}', [ProfileController::class, 'showPartie']);
     });
