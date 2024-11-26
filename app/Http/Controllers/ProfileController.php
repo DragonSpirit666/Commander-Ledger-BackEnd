@@ -76,7 +76,6 @@ class ProfileController extends Controller
         $utilisateur->update($donneesValide);
 
         return response()->json([
-            'message' => 'Utilisateur mis à jour avec succès',
             'data' => new UtilisateurResource($utilisateur),
         ]);
     }
@@ -108,7 +107,6 @@ class ProfileController extends Controller
 //        $utilisateur->delete();
 
         return response()->json([
-            'message' => 'Utilisateur anonymisé et désactivé avec succès.',
             'data' => new UtilisateurResource($utilisateurNonModifie),
         ]);
     }
@@ -162,7 +160,8 @@ class ProfileController extends Controller
      */
     public function envoyerDemandeAmi(int $id, Request $requete): JsonResponse
     {
-        $id_ami = $requete->get('utilisateur_receveur_id', null);
+        $requete->validate(['utilisateur_receveur_id' => ['required', 'int', 'exists:utilisateurs,id']]);
+        $id_ami = $requete->get('utilisateur_receveur_id');
 
         if ($id === $id_ami) {
             return response()->json(['message' => 'Tu ne peux pas envoyer une demande d\'ami à toi-même.'], 400);
