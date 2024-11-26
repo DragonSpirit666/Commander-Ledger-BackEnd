@@ -14,7 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
 class Utilisateur extends Authenticatable
 {
     /** @use HasFactory<UtilisateurFactory> */
-    use HasFactory, HasApiTokens, Notifiable, SoftDeletes;
+    use HasFactory, HasApiTokens, Notifiable;
 
     /**
      * Les attributs qui peuvent être assignés en masse.
@@ -29,7 +29,8 @@ class Utilisateur extends Authenticatable
         'prive',
         'nb_parties_gagnees',
         'nb_parties_perdues',
-        'prix_total_decks'
+        'prix_total_decks',
+        'supprime'
     ];
 
     /**

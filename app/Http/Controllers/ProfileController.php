@@ -31,7 +31,7 @@ class ProfileController extends Controller
      */
     public function indexUtilisateur(): JsonResponse
     {
-        $utilisateurs = Utilisateur::withTrashed()->get();
+        $utilisateurs = Utilisateur::where('supprime', false)->get();
 
         return response()->json(new UtilisateurCollection($utilisateurs));
     }
@@ -89,17 +89,20 @@ class ProfileController extends Controller
         $utilisateur = Utilisateur::findOrFail($id);
 
         $utilisateurNonModifie = $utilisateur->replicate();
+        $utilisateurNonModifie->id = $id;
+        $utilisateurNonModifie->supprime = true;
 
         $utilisateur->update([
             'nom' => 'Inconnu' . $utilisateur->id,
             'courriel' => 'inconnu' . $utilisateur->id . '@example.com',
             'photo' => null,
-            'prive' => true,
+            'prive' => false,
             'password' => bcrypt(Str::random()),
+            'supprime' => true
         ]);
 
         // Soft delete
-        $utilisateur->delete();
+//        $utilisateur->delete();
 
         return response()->json([
             'message' => 'Utilisateur anonymisé et désactivé avec succès.',

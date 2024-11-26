@@ -25,6 +25,7 @@ class UtilisateurPublicResource extends JsonResource
             "nb_parties_gagnees" => $this->nb_parties_gagnees,
             "nb_parties_perdues" => $this->nb_parties_perdues,
             "prix_total_decks" => $this->prix_total_decks,
+            "supprime" => $this->supprime
         ];
     }
 }
