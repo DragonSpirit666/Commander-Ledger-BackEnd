@@ -500,14 +500,6 @@ class ProfileController extends Controller
         Utilisateur::findorfail($id);
 
         if ($request->invitation_acceptee == 1) {
-            if ($partieDeck->position != null) {
-                $deck = Deck::find($partieDeck->deck_id);
-                $deck->update([
-                    'nb_parties_gagnees' => $deck->nb_parties_gagnees + ($partieDeck->position == 1 ? 1 : 0),
-                    'nb_parties_perdues' => $deck->nb_parties_perdues + ($partieDeck->position == 1 ? 0 : 1),
-                ]);
-            }
-
             $partieDeck->update(['validee' => true, 'refusee' => false]);
             return response()->json(['message' => 'Invitation à la partie acceptée.']);
         } else {
