@@ -5,6 +5,7 @@ use App\Models\Partie;
 use App\Models\PartieDeck;
 use App\Models\Utilisateur;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use function PHPUnit\Framework\assertEquals;
 
 uses(RefreshDatabase::class);
 
@@ -141,4 +142,32 @@ describe('Test la route pour get une partie', function () {
         $response = $this->getJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties/9385');
         $response->assertStatus(404);
     });
+});
+
+describe("Test la route pour get les invitations à des parties", function() {
+   it("Peut récupérer les invitations non validées", function() {
+       $this->seed();
+
+       $utilisateur = Utilisateur::get()[0];
+       $this->actingAs($utilisateur);
+
+       $response = $this->getJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties/invitations');
+       $response->assertStatus(200);
+   });
+
+   it("Ne renvoit pas les parties validées", function() {
+       $this->seed();
+       $this->actingAs(Utilisateur::get()[0]);
+
+       $partieDeck = PartieDeck::get()[0];
+       $utilisateurNotifier = Deck::find($partieDeck->deck_id)->utilisateur;
+
+       $decks = Deck::where('utilisateur_id', $utilisateurNotifier->id);
+       $invitations = PartieDeck::wherein('deck_id', $decks->pluck('id'))->get();
+
+       $partieDeck->update(['validee' => true]);
+
+       $response = $this->getJson('/commander-ledger/utilisateurs/'.$utilisateurNotifier->id.'/parties/invitations');
+       $response->assertStatus(200)->assertJsonCount($invitations->count() - 1, 'data');
+   });
 });

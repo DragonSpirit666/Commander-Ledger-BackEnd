@@ -22,6 +22,7 @@ describe('Test le model d\'une partie-deck', function () {
         $partieDeck = new PartieDeck();
         $valeursRemplissablesAttendues = [
             'validee',
+            'refusee',
             'position',
             'partie_id',
             'deck_id'

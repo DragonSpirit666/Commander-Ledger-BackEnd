@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('position')->nullable();
             $table->boolean('validee')->default(false);
+            $table->boolean('refusee')->default(false);
             $table->foreignId('partie_id')->constrained('parties');
             $table->foreignId('deck_id')->constrained('decks');
             $table->timestamps();

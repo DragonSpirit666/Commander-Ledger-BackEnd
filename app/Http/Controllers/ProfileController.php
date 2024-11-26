@@ -440,6 +440,36 @@ class ProfileController extends Controller
     }
 
     /**
+     * Récupère les parties associées à un utilisateur qui n'ont pas encore été acceptées
+     *
+     * @param int $id id de l'utilisateur
+     *
+     * @return PartieCollection la liste des parties pas encore acceptée / refusée
+     */
+    public function notificationInvitationPartie(int $id) {
+        $decks = Deck::where('utilisateur_id', $id)->get();
+
+        $invitationsParties = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->where('validee', false)->get();
+        $parties = Partie::wherein('id', $invitationsParties->pluck('id'))->get();
+
+        $information = [];
+
+        foreach ($parties as $partie) {
+            $information[] = [
+                'id' => $partie->id,
+                'date' => $partie->date,
+                'nb_participants' => $partie->nb_participants,
+                'terminee' => $partie->terminee,
+                'createur_id' => $partie->createur->id,
+                'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
+                'participants' => $invitationsParties,
+            ];
+        }
+
+        return new PartieCollection($information);
+    }
+
+    /**
      * Supprime un deck (l'anonymise)
      *
      * @param int $id id du deck à supprimer
