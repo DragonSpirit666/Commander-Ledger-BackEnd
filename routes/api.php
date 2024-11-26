@@ -20,6 +20,17 @@ Route::prefix('utilisateurs')
         // Route pour supprimer un utilisateur
         Route::delete('/{id}', [ProfileController::class, 'destroyUtilisateur']);
 
+        // Route pour accepter demande d'amis
+        Route::put('/{id}/amis/demandes/{id_ami}', [ProfileController::class, 'acceptationAmi']);
+        // Route pour créer une demande d'amis
+        Route::post('/{id}/amis/demandes', [ProfileController::class, 'envoyerDemandeAmi']);
+        // Route pour obtenir la liste des amis d'un utilisateur
+        Route::get('/{id}/amis', [ProfileController::class, 'obtenirListeAmis']);
+        // Route pour obtenir les demandes envoyées par un utilisateur
+        Route::get('/{id}/amis/demandes', [ProfileController::class, 'notificationDemandeAmi']);
+        // Effacer une demande ou une amitié existante
+        Route::delete('/{id}/amis/{id_ami}', [ProfileController::class, 'EffacerAmitie']);
+
         // Route pour la liste des decks
         Route::get('/{id}/decks', [ProfileController::class, 'indexDeck']);
         // Route pour obtenir un deck
@@ -34,6 +45,7 @@ Route::prefix('utilisateurs')
         // Route pour get une partie
         Route::get('/{id}/parties/{partieId}', [ProfileController::class, 'showPartie']);
     });
+
 
 Route::middleware(['api'])->group(function () {
     require __DIR__ . '/auth.php';
