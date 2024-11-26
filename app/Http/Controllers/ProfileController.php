@@ -337,7 +337,6 @@ class ProfileController extends Controller
      */
     public function storePartie(int $id, PartieRequest $request) : PartieResource
     {
-        // Personne qui creer partie a automatiquement valider l'invitation
         $request->validated();
 
         $listeParticipants = $request->get('participants');
@@ -355,11 +354,18 @@ class ProfileController extends Controller
 
         foreach ($listeParticipants as $participant) {
             $deck = Deck::find($participant['deck_id']);
+            $partieAcceptee = false;
+
+            if ($deck->utilisateur->id == $id) {
+                $partieAcceptee = true;
+            }
+            $deck = Deck::find($participant['deck_id']);
 
             $partieDeck = PartieDeck::create([
                 'partie_id' => $partie->id,
                 'deck_id' => $participant['deck_id'],
                 'position' => in_array('position', $participant) ? $participant['position'] : null,
+                'validee' => $partieAcceptee
             ]);
 
             $listePartiesDecks[] = $partieDeck;
@@ -449,13 +455,17 @@ class ProfileController extends Controller
      */
     public function notificationInvitationPartie(int $id) {
         $decks = Deck::where('utilisateur_id', $id)->get();
+//        dd($decks->pluck('id'));
 
         $invitationsParties = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->where('validee', false)->get();
-        $parties = Partie::wherein('id', $invitationsParties->pluck('id'))->get();
+//        dd($invitationsParties->pluck('id'));
+        $parties = Partie::wherein('id', $invitationsParties->pluck('partie_id'))->get();
 
         $information = [];
 
         foreach ($parties as $partie) {
+            $partieDecks = PartieDeck::where('partie_id', $partie->id)->get();
+
             $information[] = [
                 'id' => $partie->id,
                 'date' => $partie->date,
@@ -463,7 +473,7 @@ class ProfileController extends Controller
                 'terminee' => $partie->terminee,
                 'createur_id' => $partie->createur->id,
                 'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
-                'participants' => $invitationsParties,
+                'participants' => $partieDecks,
             ];
         }
 
