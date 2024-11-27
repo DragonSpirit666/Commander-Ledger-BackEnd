@@ -8,7 +8,7 @@ use App\Http\Resources\PartieCollection;
 use App\Http\Resources\PartieResource;
 use App\Http\Resources\UtilisateurCollection;
 use App\Http\Resources\UtilisateurResource;
-
+use App\Logique\LogiqueUtilisateur;
 use App\Models\Deck;
 use App\Models\Partie;
 use App\Models\PartieDeck;
@@ -36,6 +36,10 @@ class ProfileController extends Controller
     {
         $utilisateurs = Utilisateur::where('supprime', false)->get();
 
+        foreach ($utilisateurs as $utilisateur) {
+            LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
+        }
+
         return response()->json(new UtilisateurCollection($utilisateurs));
     }
 
@@ -48,6 +52,7 @@ class ProfileController extends Controller
     public function showUtilisateur(int $id): JsonResponse
     {
         $utilisateur = Utilisateur::findOrFail($id);
+        LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
 
         return response()->json([
             'data' => new UtilisateurResource($utilisateur),
@@ -75,6 +80,8 @@ class ProfileController extends Controller
         $utilisateur = Utilisateur::findOrFail($id);
         $utilisateur->update($donneesValide);
 
+        LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
+
         return response()->json([
             'data' => new UtilisateurResource($utilisateur),
         ]);
@@ -89,6 +96,7 @@ class ProfileController extends Controller
     public function destroyUtilisateur(int $id): JsonResponse
     {
         $utilisateur = Utilisateur::findOrFail($id);
+        LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
 
         $utilisateurNonModifie = $utilisateur->replicate();
         $utilisateurNonModifie->id = $id;
@@ -102,9 +110,6 @@ class ProfileController extends Controller
             'password' => bcrypt(Str::random()),
             'supprime' => true
         ]);
-
-        // Soft delete
-//        $utilisateur->delete();
 
         return response()->json([
             'data' => new UtilisateurResource($utilisateurNonModifie),
@@ -277,7 +282,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Récupère-les decks d'un utilisateur
+     * Récupère les decks d'un utilisateur
      *
      * @param $id int Id de l'utilisateur
      * @return JsonResponse Les decks de l'utilisateur
@@ -340,6 +345,7 @@ class ProfileController extends Controller
         $request->validated();
 
         $listeParticipants = $request->get('participants');
+
         $nbParticippants = count($listeParticipants);
         $terminee = $request->has('terminee') ? $request->get('terminee') : false;
 
@@ -455,10 +461,8 @@ class ProfileController extends Controller
      */
     public function notificationInvitationPartie(int $id) {
         $decks = Deck::where('utilisateur_id', $id)->get();
-//        dd($decks->pluck('id'));
 
         $invitationsParties = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->where('validee', false)->get();
-//        dd($invitationsParties->pluck('id'));
         $parties = Partie::wherein('id', $invitationsParties->pluck('partie_id'))->get();
 
         $information = [];
