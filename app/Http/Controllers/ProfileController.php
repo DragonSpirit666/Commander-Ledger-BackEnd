@@ -354,11 +354,18 @@ class ProfileController extends Controller
 
         foreach ($listeParticipants as $participant) {
             $deck = Deck::find($participant['deck_id']);
+            $partieAcceptee = false;
+
+            if ($deck->utilisateur->id == $id) {
+                $partieAcceptee = true;
+            }
+            $deck = Deck::find($participant['deck_id']);
 
             $partieDeck = PartieDeck::create([
                 'partie_id' => $partie->id,
                 'deck_id' => $participant['deck_id'],
                 'position' => in_array('position', $participant) ? $participant['position'] : null,
+                'validee' => $partieAcceptee
             ]);
 
             $listePartiesDecks[] = $partieDeck;
@@ -389,7 +396,7 @@ class ProfileController extends Controller
     public function indexPartie(int $id): PartieCollection
     {
         $decks = Deck::where('utilisateur_id', $id);
-        $partiesDecksUtilisateur = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->get();
+        $partiesDecksUtilisateur = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->where('validee', true)->where('refusee', false)->get();
         $parties = Partie::find($partiesDecksUtilisateur->pluck('partie_id'));
 
         $partiesDecksTotal = PartieDeck::whereIn('partie_id', $parties->pluck('id'))->get();
@@ -437,6 +444,68 @@ class ProfileController extends Controller
             'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
             'participants' => $partiesDecks,
         ]);
+    }
+
+    /**
+     * Récupère les parties associées à un utilisateur qui n'ont pas encore été acceptées
+     *
+     * @param int $id id de l'utilisateur
+     *
+     * @return PartieCollection la liste des parties pas encore acceptée / refusée
+     */
+    public function notificationInvitationPartie(int $id) {
+        $decks = Deck::where('utilisateur_id', $id)->get();
+//        dd($decks->pluck('id'));
+
+        $invitationsParties = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->where('validee', false)->get();
+//        dd($invitationsParties->pluck('id'));
+        $parties = Partie::wherein('id', $invitationsParties->pluck('partie_id'))->get();
+
+        $information = [];
+
+        foreach ($parties as $partie) {
+            $partieDecks = PartieDeck::where('partie_id', $partie->id)->get();
+
+            $information[] = [
+                'id' => $partie->id,
+                'date' => $partie->date,
+                'nb_participants' => $partie->nb_participants,
+                'terminee' => $partie->terminee,
+                'createur_id' => $partie->createur->id,
+                'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
+                'participants' => $partieDecks,
+            ];
+        }
+
+        return new PartieCollection($information);
+    }
+
+    /**
+     * Update l'invitation à une partie avec la réponse (acceptée ou non) et update les statistiques utilisateurs et decks
+     * nécessaire selon la réponse.
+     *
+     * @param int $id id de l'utilisateur qui reçoit l'invitation
+     * @param int $invitationId id de l'invitation (PartieDeck)
+     * @param Request $request request contenant la réponse (acceptee)
+     *
+     * @return JsonResponse
+     */
+    public function acceptationInvitationPartie(int $id, int $invitationId, Request $request) {
+        $request->validate(['invitation_acceptee' =>  ['required', 'boolean']]);
+        $partieDeck = PartieDeck::findorfail($invitationId);
+        if ($partieDeck->validee) {
+            return response()->json(['message' => 'Cette invitation n\'existe pas.'], 404);
+        }
+
+        Utilisateur::findorfail($id);
+
+        if ($request->invitation_acceptee == 1) {
+            $partieDeck->update(['validee' => true, 'refusee' => false]);
+            return response()->json(['message' => 'Invitation à la partie acceptée.']);
+        } else {
+            $partieDeck->update(['validee' => true, 'refusee' => true]);
+            return response()->json(['message' => 'Invitation à la partie refusée.']);
+        }
     }
 
     /**

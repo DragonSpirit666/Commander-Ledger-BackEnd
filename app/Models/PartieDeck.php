@@ -14,6 +14,7 @@ class PartieDeck extends Model
     use HasFactory;
     protected $fillable = [
         'validee',
+        'refusee',
         'position',
         'partie_id',
         'deck_id'
