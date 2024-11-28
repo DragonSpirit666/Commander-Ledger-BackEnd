@@ -21,7 +21,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
-use function PHPUnit\Framework\greaterThan;
 
 /**
  * Controleur des utilisateurs
@@ -340,6 +339,12 @@ class ProfileController extends Controller
         return response()->json(['data' => $deck]);
     }
 
+    /**
+     * Calculer le nombre de parties gagnées par un deck
+     *
+     * @param $deckId int Id du deck
+     * @return int Nombre de parties gagnées
+     */
     private function CalculerDeckGagnees(int $deckId) : int {
         $partiesDeck = PartieDeck::where('deck_id', $deckId)->
         where('position', 1)->where('validee', True)->
@@ -348,6 +353,12 @@ class ProfileController extends Controller
         return count($partiesDeck);
     }
 
+    /**
+     * Calculer le nombre de parties perdues par un deck
+     *
+     * @param $deckId int Id du deck
+     * @return int Nombre de parties perdues
+     */
     private function CalculerDeckPerdu(int $deckId) : int {
         $partiesDeck = PartieDeck::where('deck_id', $deckId)->
         where('position', '>', 1)->where('validee', True)->
@@ -356,6 +367,12 @@ class ProfileController extends Controller
         return count($partiesDeck);
     }
 
+    /**
+     * Calculer le pourcentage d'utilisation d'un deck
+     *
+     * @param $deckId int Id du deck
+     * @return int Pourcentage d'utilisation
+     */
     private function CalculerDeckPourcentageUtilisation(int $deckId) : int {
         $partiesDeck = count(PartieDeck::where('deck_id', $deckId)->where('validee', True)->
         where('refusee', False)->get());
