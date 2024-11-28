@@ -1,5 +1,7 @@
 <?php
 use App\Models\Deck;
+use App\Models\Partie;
+use App\Models\PartieDeck;
 use App\Models\Utilisateur;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use function PHPUnit\Framework\assertEquals;
@@ -33,6 +35,63 @@ describe('Test les routes pour get des decks', function () {
         $response->assertJsonFragment(['nom' => $deck->nom]);
     });
 
+    test('Calcule les parti gagnees et perdu' , function () {
+        $utilisateur1 = Utilisateur::factory()->create();
+        $utilisateur2 = Utilisateur::factory()->create();
+        $utilisateur3 = Utilisateur::factory()->create();
+        $deck1 = Deck::factory()->create(['utilisateur_id' => $utilisateur1->id]);
+        $deck2 = Deck::factory()->create(['utilisateur_id' => $utilisateur2->id]);
+        $deck3 = Deck::factory()->create(['utilisateur_id' => $utilisateur3->id]);
+
+        $partie = Partie::factory()->create();
+        PartieDeck::factory()->create(['partie_id' => $partie->id, 'deck_id' => $deck1->id, 'validee' => 1, 'position' => 1]);
+        PartieDeck::factory()->create(['partie_id' => $partie->id, 'deck_id' => $deck2->id, 'validee' => 1, 'position' => 2]);
+        PartieDeck::factory()->create(['partie_id' => $partie->id, 'deck_id' => $deck3->id, 'validee' => 0, 'position' => 1]);
+
+        $this->actingAs($utilisateur1);
+
+        $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur1->id}/decks/{$deck1->id}");
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['nb_parties_gagnees' => 1]);
+
+        $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur1->id}/decks/{$deck2->id}");
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['nb_parties_gagnees' => 0]);
+
+        $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur1->id}/decks/{$deck3->id}");
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['nb_parties_gagnees' => 0]);
+    });
+
+    test('Calcule le pourcentage utilisation' , function () {
+        $utilisateur1 = Utilisateur::factory()->create();
+        $deck1 = Deck::factory()->create(['utilisateur_id' => $utilisateur1->id]);
+        $deck2 = Deck::factory()->create(['utilisateur_id' => $utilisateur1->id]);
+        $deck3 = Deck::factory()->create(['utilisateur_id' => $utilisateur1->id]);
+        $deck4 = Deck::factory()->create(['utilisateur_id' => $utilisateur1->id]);
+
+        $partie = Partie::factory()->create();
+        PartieDeck::factory()->create(['partie_id' => $partie->id, 'deck_id' => $deck1->id, 'validee' => 1, 'position' => 1]);
+        PartieDeck::factory()->create(['partie_id' => $partie->id, 'deck_id' => $deck2->id, 'validee' => 1, 'position' => 2]);
+        PartieDeck::factory()->create(['partie_id' => $partie->id, 'deck_id' => $deck3->id, 'validee' => 0, 'position' => 1]);
+
+        $this->actingAs($utilisateur1);
+
+        $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur1->id}/decks/{$deck1->id}");
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['pourcentage_utilisation' => 50]);
+
+        PartieDeck::factory()->create(['partie_id' => $partie->id, 'deck_id' => $deck4->id, 'validee' => 1, 'position' => 2]);
+
+        $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur1->id}/decks/{$deck1->id}");
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['pourcentage_utilisation' => 33]);
+
+        $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur1->id}/decks/{$deck3->id}");
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['pourcentage_utilisation' => 0]);
+    });
+
     test('Donne une erreur si le deck n\'existe pas' , function () {
         $utilisateur = Utilisateur::factory()->create();
 
@@ -43,8 +102,7 @@ describe('Test les routes pour get des decks', function () {
         $response->assertStatus(404);
     });
 
-    // LE TEST RENVOI 500 PARCE QUE LA ROUTE NE PREND PAS DE STRING PARCE QUE TU DEMANDE UNE ID
-    /*test('Donne une erreur si la requête est mal formée' , function () {
+    test('Donne une erreur si la requête est mal formée' , function () {
         $utilisateur = Utilisateur::factory()->create();
 
         $this->actingAs($utilisateur);
@@ -52,7 +110,7 @@ describe('Test les routes pour get des decks', function () {
         $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur->id}/decks/abc");
 
         $response->assertStatus(400);
-    });*/
+    });
 });
 
 describe("Test la route pour delete un deck", function () {
