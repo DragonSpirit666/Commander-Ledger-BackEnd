@@ -38,6 +38,7 @@ class ProfileController extends Controller
 
         foreach ($utilisateurs as $utilisateur) {
             LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
+            LogiqueUtilisateur::CalculerRatioPartiesGagneesUtilisateur($utilisateur);
         }
 
         return response()->json(new UtilisateurCollection($utilisateurs));
@@ -53,6 +54,7 @@ class ProfileController extends Controller
     {
         $utilisateur = Utilisateur::findOrFail($id);
         LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
+        LogiqueUtilisateur::CalculerRatioPartiesGagneesUtilisateur($utilisateur);
 
         return response()->json([
             'data' => new UtilisateurResource($utilisateur),
@@ -81,6 +83,7 @@ class ProfileController extends Controller
         $utilisateur->update($donneesValide);
 
         LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
+        LogiqueUtilisateur::CalculerRatioPartiesGagneesUtilisateur($utilisateur);
 
         return response()->json([
             'data' => new UtilisateurResource($utilisateur),
@@ -97,6 +100,7 @@ class ProfileController extends Controller
     {
         $utilisateur = Utilisateur::findOrFail($id);
         LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
+        LogiqueUtilisateur::CalculerRatioPartiesGagneesUtilisateur($utilisateur);
 
         $utilisateurNonModifie = $utilisateur->replicate();
         $utilisateurNonModifie->id = $id;
