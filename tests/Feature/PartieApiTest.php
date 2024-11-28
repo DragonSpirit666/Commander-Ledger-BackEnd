@@ -281,10 +281,10 @@ describe("Test la route pour répondre à une invitation de partie", function() 
     test("Peut accetper une invitation", function() {
         $this->refreshDatabase();
         $this->seed();
-        $this->actingAs(Utilisateur::get()[0]);
 
         $partieDeck = PartieDeck::get()[0];
         $utilisateurNotifier = Deck::find($partieDeck->deck_id)->utilisateur;
+        $this->actingAs($utilisateurNotifier);
 
         $decks = Deck::where('utilisateur_id', $utilisateurNotifier->id);
         $invitationsAvant = PartieDeck::wherein('deck_id', $decks->pluck('id'))
@@ -305,10 +305,10 @@ describe("Test la route pour répondre à une invitation de partie", function() 
     test("Peut refuser une invitation", function() {
         $this->refreshDatabase();
         $this->seed();
-        $this->actingAs(Utilisateur::get()[0]);
 
         $partieDeck = PartieDeck::get()[0];
         $utilisateurNotifier = Deck::find($partieDeck->deck_id)->utilisateur;
+        $this->actingAs($utilisateurNotifier);
 
         $decks = Deck::where('utilisateur_id', $utilisateurNotifier->id);
         $invitationsAvant = PartieDeck::wherein('deck_id', $decks->pluck('id'))
@@ -329,10 +329,10 @@ describe("Test la route pour répondre à une invitation de partie", function() 
     test("Ne peut répondre à une invitation déjà validée", function() {
         $this->refreshDatabase();
         $this->seed();
-        $this->actingAs(Utilisateur::get()[0]);
 
         $partieDeck = PartieDeck::get()[0];
         $utilisateurNotifier = Deck::find($partieDeck->deck_id)->utilisateur;
+        $this->actingAs($utilisateurNotifier);
 
         $decks = Deck::where('utilisateur_id', $utilisateurNotifier->id);
         $invitationsAvant = PartieDeck::wherein('deck_id', $decks->pluck('id'))
@@ -354,10 +354,10 @@ describe("Test la route pour répondre à une invitation de partie", function() 
     test("Le champ invitation_acceptee est requis", function() {
         $this->refreshDatabase();
         $this->seed();
-        $this->actingAs(Utilisateur::get()[0]);
 
         $partieDeck = PartieDeck::get()[0];
         $utilisateurNotifier = Deck::find($partieDeck->deck_id)->utilisateur;
+        $this->actingAs($utilisateurNotifier);
 
         $decks = Deck::where('utilisateur_id', $utilisateurNotifier->id);
         $invitationsAvant = PartieDeck::wherein('deck_id', $decks->pluck('id'))
@@ -373,5 +373,29 @@ describe("Test la route pour répondre à une invitation de partie", function() 
             ->where('refusee', false)
             ->get();
         assertEquals(count($invitationsAvant), count($invitationsApres));
+    });
+
+    it("Ne peut répondre à une invitation n'étant pas envoyé à l'utilisateur authentifié", function() {
+        $this->refreshDatabase();
+        $this->seed();
+        $this->actingAs(Utilisateur::get()[0]);
+
+        $partieDeck = PartieDeck::get()[0];
+        $utilisateurNotifier = Deck::find($partieDeck->deck_id)->utilisateur;
+
+        $decks = Deck::where('utilisateur_id', $utilisateurNotifier->id);
+        $invitationsAvant = PartieDeck::wherein('deck_id', $decks->pluck('id'))
+            ->where('validee', false)
+            ->where('refusee', false)
+            ->get();
+
+        $response = $this->putJson('/commander-ledger/utilisateurs/'.$utilisateurNotifier->id.'/parties/invitations/'.$partieDeck->id, ['invitation_acceptee' => true]);
+        $response->assertStatus(403);
+
+        $invitationsApres = PartieDeck::wherein('deck_id', $decks->pluck('id'))
+            ->where('validee', false)
+            ->where('refusee', false)
+            ->get();
+        assertEquals($invitationsAvant->count(), count($invitationsApres));
     });
 });
