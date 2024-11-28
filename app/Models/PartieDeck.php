@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -10,8 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class PartieDeck extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'validee',
+        'refusee',
         'position',
         'partie_id',
         'deck_id'

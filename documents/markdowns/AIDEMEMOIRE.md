@@ -37,7 +37,7 @@
 ### Authentification
 - sail composer require laravel/breeze --dev --> Ajouter une dépendance a breeze
 - sail artisan breeze:install --> ajoute les ressources nécessaire pour la gestion de l'authentification
-    - Blade with Alpine
+    - Blade with Alpineg
     - No
     - PHPUnit
 

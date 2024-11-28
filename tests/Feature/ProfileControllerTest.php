@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use function PHPUnit\Framework\assertEquals;
+use function PHPUnit\Framework\assertTrue;
 
 class ProfileControllerTest extends TestCase
 {
@@ -30,7 +32,7 @@ class ProfileControllerTest extends TestCase
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->getJson('/api/utilisateurs');
+        ])->getJson('/commander-ledger/utilisateurs');
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
@@ -52,24 +54,29 @@ class ProfileControllerTest extends TestCase
     {
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
-        ])->putJson('/api/utilisateurs/' . $this->utilisateur->id, [
+        ])->putJson('/commander-ledger/utilisateurs/' . $this->utilisateur->id, [
             'nom' => 'Nouveau Nom',
             'courriel' => 'nouveau@exemple.com',
             'prive' => true
         ]);
 
         $response->assertStatus(200);
-        $response->assertJsonFragment(['message' => 'Utilisateur mis à jour avec succès']);
+        $utilisateur = Utilisateur::find($this->utilisateur->id);
+        assertEquals('Nouveau Nom', $utilisateur->nom);
+        assertEquals('nouveau@exemple.com', $utilisateur->courriel);
+        assertTrue($utilisateur->prive);
     }
 
     public function testPeutSupprimerUnUtilisateur()
     {
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $this->token,
-        ])->deleteJson('/api/utilisateurs/' . $this->utilisateur->id);
+        ])->deleteJson('/commander-ledger/utilisateurs/' . $this->utilisateur->id);
 
         $response->assertStatus(200);
-        $response->assertJsonFragment(['message' => 'Utilisateur anonymisé et désactivé avec succès.']);
+
+        $utilisateur = Utilisateur::find($this->utilisateur->id);
+        assertEquals('Inconnu'.$this->utilisateur->id, $utilisateur->nom);
     }
 }
 

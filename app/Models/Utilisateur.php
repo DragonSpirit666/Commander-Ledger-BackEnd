@@ -14,7 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
 class Utilisateur extends Authenticatable
 {
     /** @use HasFactory<UtilisateurFactory> */
-    use HasFactory, HasApiTokens, Notifiable, SoftDeletes;
+    use HasFactory, HasApiTokens, Notifiable;
 
     /**
      * Les attributs qui peuvent être assignés en masse.
@@ -29,7 +29,8 @@ class Utilisateur extends Authenticatable
         'prive',
         'nb_parties_gagnees',
         'nb_parties_perdues',
-        'prix_total_decks'
+        'prix_total_decks',
+        'supprime'
     ];
 
     /**
@@ -58,4 +59,25 @@ class Utilisateur extends Authenticatable
             'prix_total_decks' => 'decimal:2',
         ];
     }
+
+    public function EnvoiDemandeAmi()
+    {
+        return $this->hasMany(Ami::class, 'utilisateur_demandeur_id');
+    }
+
+    public function RecevoirDemandeAmi()
+    {
+        return $this->hasMany(Ami::class, 'utilisateur_receveur_id');
+    }
+
+    public function amisAccepter()
+    {
+        $amisDemandeur = $this->EnvoiDemandeAmi()->where('invitation_accepter', true)->get();
+        $amisReceveur = $this->RecevoirDemandeAmi()->where('invitation_accepter', true)->get();
+
+        $amis = $amisDemandeur->merge($amisReceveur)->unique('id');;
+
+        return $amis;
+    }
+
 }

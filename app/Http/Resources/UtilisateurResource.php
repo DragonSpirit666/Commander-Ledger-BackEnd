@@ -6,14 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @property mixed $id
- * @property mixed $nom
- * @property mixed $courriel
- * @property mixed $photo
- * @property mixed $prive
- * @property mixed $nb_parties_gagnees
- * @property mixed $nb_parties_perdues
- * @property mixed $prix_total_decks
+ * Ressource d'un utilisateur
  */
 class UtilisateurResource extends JsonResource
 {
@@ -34,6 +27,7 @@ class UtilisateurResource extends JsonResource
             "nb_parties_gagnees" => $this->nb_parties_gagnees,
             "nb_parties_perdues" => $this->nb_parties_perdues,
             "prix_total_decks" => $this->prix_total_decks,
+            "supprime" => $this->supprime
         ];
     }
 }

@@ -21,11 +21,12 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
+            - './storage/certs/ca-certificate.crt:/etc/ssl/certs/ca-certificate.crt'
         networks:
             - sail
         depends_on:
-            - mysql
             - mailpit
+            - mysql
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:

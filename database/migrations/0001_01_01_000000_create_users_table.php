@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('nb_parties_gagnees')->default(0);
             $table->integer('nb_parties_perdues')->default(0);
             $table->decimal('prix_total_decks', 10, 2)->default(0.00);
+            $table->boolean('supprime')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });

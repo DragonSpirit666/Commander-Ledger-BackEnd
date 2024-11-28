@@ -20,8 +20,7 @@ return new class extends Migration
             $table->integer('nb_parties_perdues')->default(0);
             $table->double('prix')->default(0);
             $table->double('salt')->nullable();
-            $table->double('pourcentage_utilisation')->default(0);
-            $table->boolean('supprime')->default(false);
+            $table->double('pourcentage_utilisation');
             $table->bigInteger('utilisateur_id')->unsigned();
             $table->double('pourcentage_cartes_bleues')->default(0);
             $table->double('pourcentage_cartes_sans_couleur')->default(0);
@@ -29,6 +28,7 @@ return new class extends Migration
             $table->double('pourcentage_cartes_noires')->default(0);
             $table->double('pourcentage_cartes_vertes')->default(0);
             $table->double('pourcentage_cartes_blanches')->default(0);
+            $table->boolean('supprime')->default(false);
             $table->foreign('utilisateur_id')
                 ->references('id')
                 ->on('utilisateurs')
