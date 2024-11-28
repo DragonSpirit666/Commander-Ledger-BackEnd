@@ -22,6 +22,8 @@ class PartieDeckFactory extends Factory
         return [
             'partie_id' => Partie::factory(),
             'deck_id' => Deck::factory(),
+            'validee' => $this->faker->boolean(),
+            'position' => $this->faker->numberBetween(1, 4),
         ];
     }
 }
