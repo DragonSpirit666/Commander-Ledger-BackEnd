@@ -131,6 +131,48 @@ describe('Test la route pour créer une partie', function () {
         $this->assertEquals($nbParties, Partie::count());
         $this->assertEquals($nbPartiesDecks, PartieDeck::count());
     });
+
+    it("Doit avoir entre 2 et 8 participants", function () {
+        $this->refreshDatabase();
+        $this->seed();
+        $utilisateur = Utilisateur::get()[0];
+        $this->actingAs($utilisateur);
+
+        $nbParties = Partie::count();
+        $nbPartiesDecks = PartieDeck::count();
+
+        $partieInfo = [
+            "date" => date('Y/m/d'),
+            "participants" => [
+                ["deck_id" => Deck::get()[0]->id, "position" => 1],
+            ],
+        ];
+
+        $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
+        $response->assertStatus(422);
+        $this->assertEquals($nbParties, Partie::count());
+        $this->assertEquals($nbPartiesDecks, PartieDeck::count());
+
+        $partieInfo = [
+            "date" => date('Y/m/d'),
+            "participants" => [
+                ["deck_id" => Deck::get()[0]->id, "position" => 1],
+                ["deck_id" => Deck::get()[1]->id, "position" => 2],
+                ["deck_id" => Deck::get()[2]->id, "position" => 3],
+                ["deck_id" => Deck::get()[3]->id, "position" => 4],
+                ["deck_id" => Deck::get()[4]->id, "position" => 5],
+                ["deck_id" => Deck::get()[5]->id, "position" => 6],
+                ["deck_id" => Deck::get()[6]->id, "position" => 7],
+                ["deck_id" => Deck::get()[7]->id, "position" => 8],
+                ["deck_id" => Deck::get()[8]->id, "position" => 9],
+            ],
+        ];
+
+        $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
+        $response->assertStatus(422);
+        $this->assertEquals($nbParties, Partie::count());
+        $this->assertEquals($nbPartiesDecks, PartieDeck::count());
+    });
 });
 
 describe('Test la route pour get les parties d\'un utilisateur', function () {

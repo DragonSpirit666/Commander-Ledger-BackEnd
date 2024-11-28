@@ -429,7 +429,6 @@ class ProfileController extends Controller
             $positionsEntres[] = $participant['position'];
         }
 
-
         $listeParticipants = $request->get('participants');
 
         $nbParticippants = count($listeParticipants);
