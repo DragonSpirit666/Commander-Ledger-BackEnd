@@ -9,7 +9,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 });
 
 Route::prefix('utilisateurs')
-    //->middleware(['auth:sanctum'])
+    ->middleware(['auth:sanctum'])
     ->group(function () {
         // Route pour la liste des utilisateurs
         Route::get('/', [ProfileController::class, 'indexUtilisateur']);
@@ -21,8 +21,8 @@ Route::prefix('utilisateurs')
         // Route pour supprimer un utilisateur
         Route::delete('/{id}', [ProfileController::class, 'destroyUtilisateur']);
 
-        Route::post('/{id}/decks', [ProfileController::class, 'ajouterDeck']);
-
+        //
+        Route::post('/{id}/decks', [ProfileController::class, 'ajouterDeckManuel']);
 });
 
 Route::middleware(['api'])->group(function () {

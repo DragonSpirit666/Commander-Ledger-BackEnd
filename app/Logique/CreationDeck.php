@@ -1,9 +1,8 @@
 <?php
-namespace App\Http\Logique;
+namespace App\Logique;
 
 use App\Models\Deck;
-use App\Http\Logique\APIExterne;
-use App\Http\Logique\CompterCouleur;
+
 class CreationDeck
 {
     /**

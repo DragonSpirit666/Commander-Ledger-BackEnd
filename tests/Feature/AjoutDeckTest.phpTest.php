@@ -10,6 +10,7 @@ uses(RefreshDatabase::class);
 describe("Test effectué sur l'ajout de deck", function() {
     test("La création de deck", function() {
         $user = Utilisateur::factory()->create();
+        $this->actingAs($user);
 
         $payload = [
             'nom' => 'Test Deck',
@@ -48,6 +49,7 @@ describe("Test effectué sur l'ajout de deck", function() {
 
     test("La création de deck avec des erreurs (format incorrect)", function() {
         $user = Utilisateur::factory()->create();
+        $this->actingAs($user);
 
         // Payload avec des données incorrectes (cartes en mauvais format)
         $payload = [

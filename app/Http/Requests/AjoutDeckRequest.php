@@ -23,8 +23,11 @@ class AjoutDeckRequest extends FormRequest
     {
         // mettre les types pour les paramètres pouvant êtrte envoyé
         return [
-            'nom' => ['required'],
-            'cartes' => ['required']
+            'nom' => ['required', 'string'],
+            'cartes' => ['required', 'string'],
+            'salt' => ['double'],
+            'photo' => ['string'],
+            'prix' => ['double']
         ];
     }
 }

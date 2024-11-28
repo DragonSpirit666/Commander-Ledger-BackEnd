@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Logique\CreationDeck;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Logique\CreationDeck;
 use App\Models\Deck;
 use App\Models\Utilisateur;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);

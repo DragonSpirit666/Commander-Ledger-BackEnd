@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Logique;
+namespace App\Logique;
 
 use Illuminate\Database\Eloquent\Casts\Json;
 
