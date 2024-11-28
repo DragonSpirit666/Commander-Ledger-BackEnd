@@ -43,7 +43,7 @@ class LogiqueUtilisateur {
         $nbPartiesGagnees = PartieDeck::wherein('deck_id', $decks->pluck('id'))
             ->where('validee', true)
             ->where('refusee', false)
-            -> where('position', 1)
+            ->where('position', 1)
             ->count();
 
         $nbPartiesPerdues = $nbPartiesJouer - $nbPartiesGagnees;
