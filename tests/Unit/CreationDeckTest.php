@@ -42,7 +42,7 @@ describe("Test effectué sur la création d'un deck", function () {
         $user = Utilisateur::factory()->create();
 
         $parametres = [
-            'nom' => "Pest test1",
+            'nom' => "Pest test2",
             'cartes' => "4 Lightning Bolt\n2 Giant Growth\n1 Island",
             'salt' => 1,
             'prix' => 50
@@ -52,7 +52,7 @@ describe("Test effectué sur la création d'un deck", function () {
         $deck = CreationDeck::creerDeck($parametres, $user->id);
 
         expect($deck)->toBeInstanceOf(Deck::class)
-            ->and($deck->nom)->toBe('Pest test1')
+            ->and($deck->nom)->toBe('Pest test2')
             ->and($deck->prix)->toBe(50)
             ->and($deck->salt)->toBe(1)
             ->and($deck->pourcentage_cartes_blanches)->not->toBeNull()
@@ -61,7 +61,7 @@ describe("Test effectué sur la création d'un deck", function () {
         // Assert the deck exists in the database
         $this->assertDatabaseHas('decks', [
             'id' => $deck->id,
-            'nom' => 'Pest test1',
+            'nom' => 'Pest test2',
             'utilisateur_id' => $user->id,
             'salt' => 1,
             'prix' => 50
@@ -79,7 +79,7 @@ describe("Test effectué sur la création d'un deck", function () {
         ];
 
         expect(fn() => CreationDeck::creerDeck($parametresNomManquant, $user->id))
-            ->toThrow(\InvalidArgumentException::class, 'The nom field is required.');
+            ->toThrow(\InvalidArgumentException::class, 'les paramêtres sont obligatoires');
 
         // Test case 2: Missing "cartes"
         $parametresCartesManquant = [
@@ -87,7 +87,27 @@ describe("Test effectué sur la création d'un deck", function () {
         ];
 
         expect(fn() => CreationDeck::creerDeck($parametresCartesManquant, $user->id))
-            ->toThrow(\InvalidArgumentException::class, 'Le paramètre cartes doit contenir au moins une carte valide.');
+            ->toThrow(\InvalidArgumentException::class, 'les paramêtres sont obligatoires');
+    });
+
+    test("La création d'un deck avec paramêtres invalides", function () {
+        $user = Utilisateur::factory()->create();
+
+        $parametres = [
+            'nom' => "Pest test3",
+            'cartes' => "paramètres invalide",
+        ];
+
+        expect(fn() => CreationDeck::creerDeck($parametres, $user->id))
+            ->toThrow(\InvalidArgumentException::class, 'format de cartes invalide');
+
+        $parametresMauvais = [
+            "nom" => "Pest test4",
+            "cartes" => "4 Carte qui existe pas\n2 Carte Random"
+        ];
+
+        expect(fn() => CreationDeck::creerDeck($parametresMauvais, $user->id))
+            ->toThrow(\RuntimeException::class, ("Erreur lors de la requête API"));
     });
 
 });

@@ -6,11 +6,23 @@ use App\Http\Logique\APIExterne;
 use App\Http\Logique\CompterCouleur;
 class CreationDeck
 {
+    /**
+     * Crée un deck à partir des données fournies et de l'ID utilisateur.
+     *
+     * @param array $data Les données du deck, comprenant le nom et les cartes.
+     * @param int $id L'ID de l'utilisateur associé au deck.
+     * @return Deck Le deck créé.
+     * @throws \InvalidArgumentException Si les paramètres requis sont manquants ou invalides.
+     * @throws \RuntimeException Si une erreur survient lors de la requête à l'API externe.
+     */
     public static function creerDeck(array $data, $id) : Deck {
+        if (empty($data['nom']) || empty($data['cartes'])) {
+            throw new \InvalidArgumentException("les paramêtres sont obligatoires");
+        }
+
         $data['utilisateur_id'] = (int)$id;
         $lignes = explode("\n", $data["cartes"]);
         $cartes = array();
-
 
         foreach ($lignes as $line) {
             $line = trim($line);
@@ -18,7 +30,7 @@ class CreationDeck
 
             // validation des arguments
             if (!preg_match('/^(\d+)\s+(.*)$/', $line, $matches)) {
-                throw new \InvalidArgumentException("Invalid card format: '{$line}'. Expected format: '<quantity> <card name>'.");
+                throw new \InvalidArgumentException("format de cartes invalide");
             }
 
             $quantity = intval($matches[1]);
@@ -37,13 +49,19 @@ class CreationDeck
         $cartesDetails = array();
         foreach ($cartes as $cardName => $quantity) {
             $apiResponse = APIExterne::AppelleAPICartes($cardName);
-            // Decode the JSON response into an array
+
+            if (is_array($apiResponse)) {
+                // Handle the error response
+                throw new \RuntimeException("Erreur lors de la requête API");
+            }
+
             $decodedResponse = json_decode($apiResponse, true);
 
             // A TESTER AVEC LES ERREUR ENVOYER PAR SCRYFALL
             if (empty($decodedResponse) || !isset($decodedResponse['prices']['usd'])) {
                 throw new \RuntimeException("Failed to fetch details for card: '{$cardName}'.");
             }
+
 
             $cartesDetails[] = [
                 'carte_nom' => $cardName,
