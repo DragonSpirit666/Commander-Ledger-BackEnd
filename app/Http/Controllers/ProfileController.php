@@ -18,6 +18,7 @@ use App\Models\Utilisateur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
@@ -414,8 +415,11 @@ class ProfileController extends Controller
         $decksEntres = [];
         $positionsEntres = [];
 
+        $listeParticipants = $request->get('participants');
+        $nbParticippants = count($listeParticipants);
+
         // Ne peut pas vérifier les doublons avec des requests validation
-        foreach ($request->participants as $participant) {
+        foreach ($listeParticipants as $participant) {
             if (in_array($participant['deck_id'], $decksEntres)) {
                 return response()->json(['message' => 'Le deck \''.$participant['deck_id'].'\' ne peut participer en double dans la partie.'], 422);
             }
@@ -426,18 +430,17 @@ class ProfileController extends Controller
                 return response()->json(['message' => 'Deux participants ne peuvent avoir terminé à la position '.$participant['position'].'.'], 422);
             }
 
+            if ($participant['position'] < 1 || $participant['position'] >$nbParticippants) {
+                return response()->json(['message' => 'La position des participants doit se trouver entre 1 et le nombre de participants ('.$nbParticippants.').'], 422);
+            }
+
             $positionsEntres[] = $participant['position'];
         }
-
-        $listeParticipants = $request->get('participants');
-
-        $nbParticippants = count($listeParticipants);
-        $terminee = $request->has('terminee') ? $request->get('terminee') : false;
 
         $partie = Partie::create([
             'date' => $request->get('date'),
             'nb_participants' => $nbParticippants,
-            'terminee' => $terminee,
+            'terminee' => true,
             'createur_id' => $id,
         ]);
 
@@ -445,23 +448,17 @@ class ProfileController extends Controller
 
         foreach ($listeParticipants as $participant) {
             $deck = Deck::find($participant['deck_id']);
-            $partieAcceptee = false;
-
-            if ($deck->utilisateur->id == $id) {
-                $partieAcceptee = true;
-            }
-            $deck = Deck::find($participant['deck_id']);
 
             $partieDeck = PartieDeck::create([
                 'partie_id' => $partie->id,
                 'deck_id' => $participant['deck_id'],
                 'position' => in_array('position', $participant) ? $participant['position'] : null,
-                'validee' => $partieAcceptee
+                'validee' => $deck->utilisateur->id == $id
             ]);
 
             $listePartiesDecks[] = $partieDeck;
 
-            if ($terminee && $partieDeck->position == 1) {
+            if ($partieDeck->position == 1) {
                 $partie->update(['gagnant_id' => $deck->utilisateur->id]);
             }
         }
@@ -471,7 +468,7 @@ class ProfileController extends Controller
                 'id' => $partie->id,
                 'date' => $partie->date,
                 'nb_participants' => $nbParticippants,
-                'terminee' => $terminee,
+                'terminee' => $partie->terminee,
                 'createur_id' => $id,
                 'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
                 'participants' => $listePartiesDecks,
@@ -583,9 +580,14 @@ class ProfileController extends Controller
      */
     public function acceptationInvitationPartie(int $id, int $invitationId, Request $request) {
         $request->validate(['invitation_acceptee' =>  ['required', 'boolean']]);
+
         $partieDeck = PartieDeck::findorfail($invitationId);
         if ($partieDeck->validee) {
             return response()->json(['message' => 'Cette invitation n\'existe pas.'], 404);
+        }
+
+        if ($partieDeck->deck->utilisateur->id != auth()->id()) {
+            return response()->json(['message' => 'Vous n\'êtes pas autorisé à répondre à cette invitation.'], 403);
         }
 
         Utilisateur::findorfail($id);

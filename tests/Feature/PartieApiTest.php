@@ -90,6 +90,20 @@ describe('Test la route pour créer une partie', function () {
         $response->assertStatus(422);
         $this->assertEquals($nbParties, Partie::count());
         $this->assertEquals($nbPartiesDecks, PartieDeck::count());
+
+        $partieInfo = [
+            "date" => date('Y/m/d'),
+            "participants" => [
+                ["deck_id" => Deck::get()[0]->id, "position" => 0],
+                ["deck_id" => Deck::get()[1]->id, "position" => 2],
+            ],
+        ];
+
+        $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
+
+        $response->assertStatus(422);
+        $this->assertEquals($nbParties, Partie::count());
+        $this->assertEquals($nbPartiesDecks, PartieDeck::count());
     });
 
     it("Ne peut créer une partie avec des positions ou des decks en double", function () {
