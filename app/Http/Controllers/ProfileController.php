@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
+use function PHPUnit\Framework\greaterThan;
 
 /**
  * Controleur des utilisateurs
@@ -297,6 +298,12 @@ class ProfileController extends Controller
 
         $decks = Deck::where('utilisateur_id', $utilisateur->id)->get();
 
+        foreach ($decks as $deck) {
+            $deck->nb_parties_gagnees = $this->CalculerDeckGagnees($deck->id);
+            $deck->nb_parties_perdues = $this->CalculerDeckPerdu($deck->id);
+            $deck->pourcentage_utilisation = $this->CalculerDeckPourcentageUtilisation($deck->id);
+        }
+
         return response()->json([
             'data' => $decks,
         ]);
@@ -326,9 +333,48 @@ class ProfileController extends Controller
         $deck = Deck::where('id', (int)$deckId)
             ->firstOrFail();
 
+        $deck->nb_parties_gagnees = $this->CalculerDeckGagnees($deck->id);
+        $deck->nb_parties_perdues = $this->CalculerDeckPerdu($deck->id);
+        $deck->pourcentage_utilisation = $this->CalculerDeckPourcentageUtilisation($deck->id);
+
         return response()->json(['data' => $deck]);
     }
 
+    private function CalculerDeckGagnees(int $deckId) : int {
+        $partiesDeck = PartieDeck::where('deck_id', $deckId)->
+        where('position', 1)->where('validee', True)->
+        where('refusee', False)->get();
+
+        return count($partiesDeck);
+    }
+
+    private function CalculerDeckPerdu(int $deckId) : int {
+        $partiesDeck = PartieDeck::where('deck_id', $deckId)->
+        where('position', '>', 1)->where('validee', True)->
+        where('refusee', False)->get();
+
+        return count($partiesDeck);
+    }
+
+    private function CalculerDeckPourcentageUtilisation(int $deckId) : int {
+        $partiesDeck = count(PartieDeck::where('deck_id', $deckId)->where('validee', True)->
+        where('refusee', False)->get());
+        $partiesDeckTotal = 0;
+
+        $utilisateur = Deck::find($deckId)->utilisateur;
+        $decks = Deck::where('utilisateur_id', $utilisateur->id)->get();
+
+        foreach ($decks as $deck) {
+            $partiesDeckTotal += count(PartieDeck::where('deck_id', $deck->id)->where('validee', True)->
+            where('refusee', False)->get());
+        }
+
+        if ($partiesDeckTotal == 0) {
+            return 0;
+        }
+
+        return (int)round(($partiesDeck * 100.0) / ($partiesDeckTotal));
+    }
 
     /**
      * Création d'une partie
