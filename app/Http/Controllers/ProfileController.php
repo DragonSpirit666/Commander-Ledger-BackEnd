@@ -140,7 +140,7 @@ class ProfileController extends Controller
         }
 
         if ($ami->utilisateur_receveur_id !== auth()->id()) {
-            return response()->json(['message' => 'Non autorisé à accepter ou refuser cette demande.'], 401);
+            return response()->json(['message' => 'Non autorisé à accepter ou refuser cette demande.'], 403);
         }
 
         if ($requete->invitation_acceptee) {
