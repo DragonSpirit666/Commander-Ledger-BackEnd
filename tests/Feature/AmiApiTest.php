@@ -21,11 +21,11 @@ it('accepte une demande d\'ami', function () {
     $this->actingAs($utilisateur2);
 
     $response = $this->putJson(
-        '/commander-ledger/utilisateurs/'.$utilisateur2->id.'/amis/demandes/'.$utilisateur1->id,
-        ['invitation_accepter' => true]);
+        '/commander-ledger/utilisateurs/'.$utilisateur2->id.'/amis/demandes/'.$ami->id,
+        ['invitation_acceptee' => true]);
 
     $response->assertStatus(200)
-    ->assertJson(['message' => 'Demande d\'ami acceptée.']);
+    ->assertJson(['data' => ['message' => 'Demande d\'ami acceptée.']]);
 
     $ami->refresh();
         $this->assertEquals(true, $ami->invitation_accepter);
@@ -64,10 +64,10 @@ it('obtient la liste d\'amis d\'un utlisateur', function () {
     $response->assertStatus(200);
     $amis = $response->json();
 
-    $this->assertCount(2, $amis);
-    $this->assertTrue(collect($amis)->contains('utilisateur_receveur_id', $ami1->id));
-    $this->assertTrue(collect($amis)->contains('utilisateur_receveur_id', $ami2->id));
-    $this->assertFalse(collect($amis)->contains('utilisateur_receveur_id', $nonAmi->id));
+    $this->assertCount(2, $amis['data']);
+    $this->assertTrue(collect($amis['data'])->contains('utilisateur_receveur_id', $ami1->id));
+    $this->assertTrue(collect($amis['data'])->contains('utilisateur_receveur_id', $ami2->id));
+    $this->assertFalse(collect($amis['data'])->contains('utilisateur_receveur_id', $nonAmi->id));
 });
 
 
@@ -125,7 +125,7 @@ it('supprime une demande d\'ami ou une amitié', function () {
     $ami = Ami::create([
         'utilisateur_demandeur_id' => $utilisateur1->id,
         'utilisateur_receveur_id' => $utilisateur2->id,
-        'invitation_accepter' => false,
+        'invitation_accepter' => true,
     ]);
 
     $this->actingAs($utilisateur1);
@@ -133,7 +133,7 @@ it('supprime une demande d\'ami ou une amitié', function () {
     $response = $this->deleteJson('/commander-ledger/utilisateurs/'.$utilisateur1->id.'/amis/'.$utilisateur2->id);
 
     $response->assertStatus(200)
-        ->assertJson(['message' => 'Amitié détruit avec succès.']);
+        ->assertJson(['data' => ['message' => 'Amitié détruit avec succès.']]);
 
     $this->assertDatabaseMissing('amis', [
         'utilisateur_demandeur_id' => $utilisateur1->id,

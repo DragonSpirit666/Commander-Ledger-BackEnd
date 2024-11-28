@@ -26,7 +26,7 @@ class PartieRequest extends FormRequest
             'terminee' => ['boolean'],
             'participants' => ['required', 'array'],
             'participants.*.deck_id' => ['required', 'integer', 'exists:decks,id'],
-            'participants.*.position' => ['nullable', 'integer'],
+            'participants.*.position' => ['required', 'nullable', 'integer'],
         ];
     }
 }
