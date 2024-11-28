@@ -43,21 +43,16 @@ class CreationDeck
             throw new \InvalidArgumentException('Le paramètre cartes doit contenir au moins une carte valide.');
         }
 
-        $deck = Deck::create($data);
-        $deck->utilisateur()->associate($id);
-
         $cartesDetails = array();
         foreach ($cartes as $cardName => $quantity) {
             $apiResponse = APIExterne::AppelleAPICartes($cardName);
 
             if (is_array($apiResponse)) {
-                // Handle the error response
                 throw new \RuntimeException("Erreur lors de la requête API");
             }
 
             $decodedResponse = json_decode($apiResponse, true);
 
-            // A TESTER AVEC LES ERREUR ENVOYER PAR SCRYFALL
             if (empty($decodedResponse) || !isset($decodedResponse['prices']['usd'])) {
                 throw new \RuntimeException("Failed to fetch details for card: '{$cardName}'.");
             }
@@ -76,39 +71,43 @@ class CreationDeck
         foreach ($tauxCouleurs as $couleur => $prc) {
             switch ($couleur) {
                 case "Blaqnches":
-                    $deck->pourcentage_cartes_blanches = $prc;
+                    $data["pourcentage_cartes_blanches"] = $prc;
                     break;
                 case "Bleus":
-                    $deck->pourcentage_cartes_bleues = $prc;
+                    $data["pourcentage_cartes_bleues"] = $prc;
                     break;
                 case "SansCouleur":
-                    $deck->pourcentage_cartes_sans_couleur = $prc;
+                    $data["pourcentage_cartes_sans_couleur"] = $prc;
                     break;
                 case "Rouges":
-                    $deck->pourcentage_cartes_rouges = $prc;
+                    $data["pourcentage_cartes_rouges"] = $prc;
                     break;
                 case "Noirs":
-                    $deck->pourcentage_cartes_noires = $prc;
+                    $data["pourcentage_cartes_noires"] = $prc;
                     break;
                 case "Vertes":
-                    $deck->pourcentage_cartes_vertes = $prc;
+                    $data["pourcentage_cartes_vertes"] = $prc;
                     break;
             }
         }
-        if (isset($data['prix'])) {
-            $deck->prix = $data['prix'];
-        } else {
+        if (!isset($data['prix'])) {
             $prixTotal = 0;
             foreach ($cartesDetails as $carte) {
                 $prixTotal += $carte['prix'];
             }
 
-            $deck->prix = $prixTotal;
+            $data["prix"] = $prixTotal;
         }
 
+        dump($data);
+
+        $deck = Deck::create($data);
+
+        $deck->utilisateur()->associate($id);
 
         $deck->save();
 
         return $deck;
     }
+
 }
