@@ -405,11 +405,30 @@ class ProfileController extends Controller
      * @param int $id Id de l'utilisateur qui créer la partie
      * @param PartieRequest $request Request avec les informations envoyées
      *
-     * @return PartieResource Information sur la partie créée
+     * @return JsonResponse Information sur la partie créée
      */
-    public function storePartie(int $id, PartieRequest $request) : PartieResource
+    public function storePartie(int $id, PartieRequest $request) : JsonResponse
     {
         $request->validated();
+
+        $decksEntres = [];
+        $positionsEntres = [];
+
+        // Ne peut pas vérifier les doublons avec des requests validation
+        foreach ($request->participants as $participant) {
+            if (in_array($participant['deck_id'], $decksEntres)) {
+                return response()->json(['message' => 'Le deck \''.$participant['deck_id'].'\' ne peut participer en double dans la partie.'], 422);
+            }
+
+            $decksEntres[] = $participant['deck_id'];
+
+            if (in_array($participant['position'], $positionsEntres)) {
+                return response()->json(['message' => 'Deux participants ne peuvent avoir terminé à la position '.$participant['position'].'.'], 422);
+            }
+
+            $positionsEntres[] = $participant['position'];
+        }
+
 
         $listeParticipants = $request->get('participants');
 
@@ -448,14 +467,16 @@ class ProfileController extends Controller
             }
         }
 
-        return new PartieResource([
-            'id' => $partie->id,
-            'date' => $partie->date,
-            'nb_participants' => $nbParticippants,
-            'terminee' => $terminee,
-            'createur_id' => $id,
-            'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
-            'participants' => $listePartiesDecks,
+        return response()->json(['data' =>
+            new PartieResource([
+                'id' => $partie->id,
+                'date' => $partie->date,
+                'nb_participants' => $nbParticippants,
+                'terminee' => $terminee,
+                'createur_id' => $id,
+                'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
+                'participants' => $listePartiesDecks,
+            ])
         ]);
     }
 
