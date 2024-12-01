@@ -18,7 +18,7 @@ describe("Test effectué sur l'ajout de deck", function() {
         ];
 
         $response = $this->postJson(
-            url("http://0.0.0.0:80/commander-ledger/utilisateurs/{$user->id}/decks"),
+            url("/commander-ledger/utilisateurs/{$user->id}/decks"),
             $payload
         );
 

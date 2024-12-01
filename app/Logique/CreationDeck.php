@@ -98,8 +98,6 @@ class CreationDeck
             $data["prix"] = $prixTotal;
         }
 
-        dump($data);
-
         $deck = Deck::create($data);
 
         $deck->utilisateur()->associate($id);
