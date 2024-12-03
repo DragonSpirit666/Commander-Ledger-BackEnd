@@ -23,7 +23,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         ]);
 
-        //
+        $middleware->validateCsrfTokens(except: [
+            'commander-ledger/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->report(function (NotFoundResourceException $e) {
