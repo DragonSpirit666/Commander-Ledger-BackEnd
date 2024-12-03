@@ -41,8 +41,10 @@ class AuthenticatedSessionController extends Controller
         $user->tokens()->delete();
 
         return response()->json([
-            'message' => 'Utilisateur deconnecte avec succes.',
-            'data' => new UtilisateurResource($user),
+            'data' => [
+                'message' => 'Utilisateur deconnecté avec succès.',
+                'utilisateur' => new UtilisateurResource($user),
+            ],
         ]);
     }
 }

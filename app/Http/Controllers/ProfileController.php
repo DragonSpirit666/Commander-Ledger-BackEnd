@@ -48,10 +48,10 @@ class ProfileController extends Controller
     /**
      * Renvoyer un utilisateur
      *
-     * @param $id int
+     * @param $id string
      * @return JsonResponse
      */
-    public function showUtilisateur(int $id): JsonResponse
+    public function showUtilisateur(string $id): JsonResponse
     {
         $utilisateur = Utilisateur::findOrFail($id);
         LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
@@ -66,10 +66,10 @@ class ProfileController extends Controller
      * Modification d'un utilisateur
      *
      * @param Request $requete
-     * @param $id int
+     * @param $id string
      * @return JsonResponse
      */
-    public function updateUtilisateur(Request $requete, int $id): JsonResponse
+    public function updateUtilisateur(Request $requete, string $id): JsonResponse
     {
         $donneesValide = $requete->validate([
             'nom' => 'required|string|unique:utilisateurs,nom,' . $id,
@@ -94,10 +94,10 @@ class ProfileController extends Controller
     /**
      * Supression d'un utilisateur
      *
-     * @param $id int
+     * @param $id string
      * @return JsonResponse
      */
-    public function destroyUtilisateur(int $id): JsonResponse
+    public function destroyUtilisateur(string $id): JsonResponse
     {
         $utilisateur = Utilisateur::findOrFail($id);
         LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
@@ -124,22 +124,17 @@ class ProfileController extends Controller
     /**
      * Acceptation d'amitié
      *
-     * @param $id int Id actuel, du receveur
-     * @param $id_ami int Id du demandeur
+     * @param $id string Id actuel, du receveur
+     * @param $id_ami string Id du demandeur
      * @param Request $requete Obtient le bool avec la réponse pour la demande d'amitié
      * @return JsonResponse
      */
-    public function acceptationAmi(int $id, int $id_ami, Request $requete): JsonResponse
+    public function acceptationAmi(string $id, string $id_ami, Request $requete): JsonResponse
     {
-        $accepter = $requete->get('invitation_accepter', null);
+        // TODO valider que la demande a pas deja ete accepter
+        $requete->validate(['invitation_acceptee' => ['required', 'boolean']]);
 
-        if (!is_bool($accepter)) {
-            return response()->json(['message' => 'Le paramètre "invitation_accepter" est requis et doit être un booléen.'], 400);
-        }
-
-        $ami = Ami::where('utilisateur_demandeur_id', $id_ami)
-                    ->where('utilisateur_receveur_id', $id)
-                    ->first();
+        $ami = Ami::find($id_ami);
 
         if (!$ami) {
             return response()->json(['message' => 'Demande d\'ami n\'est pas trouvé.'], 404);
@@ -149,31 +144,31 @@ class ProfileController extends Controller
             return response()->json(['message' => 'Non autorisé à accepter ou refuser cette demande.'], 403);
         }
 
-        if ($accepter) {
+        if ($requete->invitation_acceptee) {
             // Accepter la demande
             $ami->invitation_accepter = true;
             $ami->save();
-            return response()->json(['message' => 'Demande d\'ami acceptée.'], 200);
+            return response()->json(['data' => ['message' => 'Demande d\'ami acceptée.']], 200);
         } else {
             // Refuser la demande
             $ami->delete();
-            return response()->json(['message' => 'Demande d\'ami rejetée.'], 200);
+            return response()->json(['data' => ['message' => 'Demande d\'ami rejetée.']], 200);
         }
     }
 
     /**
      * Envoyer une demande d'ami
      *
-     * @param $id int Id du demandeur
-     * @param $id_ami int Id du receveur
+     * @param $id string Id du demandeur
+     * @param $id_ami string Id du receveur
      * @return JsonResponse
      */
-    public function envoyerDemandeAmi(int $id, Request $requete): JsonResponse
+    public function envoyerDemandeAmi(string $id, Request $requete): JsonResponse
     {
         $requete->validate(['utilisateur_receveur_id' => ['required', 'int', 'exists:utilisateurs,id']]);
-        $id_ami = $requete->get('utilisateur_receveur_id');
+        $id_ami = $requete->utilisateur_receveur_id;
 
-        if ($id === $id_ami) {
+        if ($id == $id_ami) {
             return response()->json(['message' => 'Tu ne peux pas envoyer une demande d\'ami à toi-même.'], 400);
         }
 
@@ -198,50 +193,50 @@ class ProfileController extends Controller
             'invitation_accepter' => false,
         ]);
 
-        return response()->json(['message' => 'Demande d\'ami envoyer avec succès.'], 201);
+        return response()->json(['data' => ['message' => 'Demande d\'ami envoyer avec succès.']], 201);
     }
 
     /**
      * Récupérer la liste des amis d'un utilisateur.
      *
-     * @param int $id
+     * @param string $id
      * @return JsonResponse
      */
-    public function obtenirListeAmis(int $id): JsonResponse
+    public function obtenirListeAmis(string $id): JsonResponse
     {
         $utilisateur = Utilisateur::findOrFail($id);
 
         $amis = $utilisateur->amisAccepter();
 
-        return response()->json($amis, 200);
+        return response()->json(['data' => $amis], 200);
     }
 
 
     /**
-     * Obtenir liste de demande envoyer en attente d'acceptation
+     * Obtenir liste de demande obtenues en attente d'acceptation
      *
-     * @param $id int
+     * @param $id string
      * @return JsonResponse
      */
-    public function notificationDemandeAmi(int $id): JsonResponse
+    public function notificationDemandeAmi(string $id): JsonResponse
     {
-        $requete = Ami::where('utilisateur_demandeur_id', $id)
+        $requete = Ami::where('utilisateur_receveur_id', $id)
         ->where('invitation_accepter', false)
         ->get();
 
-        return response()->json([$requete]);
+        return response()->json(['data' => $requete]);
     }
 
     /**
      * FONCTION NON UTLISÉ, ROUTE EFFACER
      *
      * Obtenir liste des acceptations demande d'amis en attente
-     * @param $id int
+     * @param $id string
      * @return JsonResponse
      */
-    public function obtenirAcceptationAmiEnAttente(int $id): JsonResponse
+    public function obtenirAcceptationAmiEnAttente(string $id): JsonResponse
     {
-        $requete = Ami::where('utilisateur_receveur_id', $id)
+        $requete = Ami::where('utilisateur_demandeur_id', $id)
         ->where('invitation_accepter', false)
         ->get();
 
@@ -251,11 +246,11 @@ class ProfileController extends Controller
     /**
      * Refuser une demande d'ami
      *
-     * @param $id int
-     * @param $id_ami int
+     * @param $id string
+     * @param $id_ami string
      * @return JsonResponse
      */
-    public function EffacerAmitie(int $id, int $id_ami)
+    public function EffacerAmitie(string $id, string $id_ami)
     {
         $ami = Ami::where('utilisateur_demandeur_id', $id)
             ->where('utilisateur_receveur_id', $id_ami)
@@ -267,7 +262,7 @@ class ProfileController extends Controller
 
         $ami->delete();
 
-        return response()->json(['message' => 'Amitié détruit avec succès.']);
+        return response()->json(['data' => ['message' => 'Amitié détruit avec succès.', 'ami' => $ami]]);
     }
 
     /**
@@ -403,12 +398,12 @@ class ProfileController extends Controller
     /**
      * Création d'une partie
      *
-     * @param int $id Id de l'utilisateur qui créer la partie
+     * @param string $id Id de l'utilisateur qui créer la partie
      * @param PartieRequest $request Request avec les informations envoyées
      *
      * @return JsonResponse Information sur la partie créée
      */
-    public function storePartie(int $id, PartieRequest $request) : JsonResponse
+    public function storePartie(string $id, PartieRequest $request) : JsonResponse
     {
         $request->validated();
 
@@ -452,7 +447,7 @@ class ProfileController extends Controller
             $partieDeck = PartieDeck::create([
                 'partie_id' => $partie->id,
                 'deck_id' => $participant['deck_id'],
-                'position' => in_array('position', $participant) ? $participant['position'] : null,
+                'position' => $participant['position'],
                 'validee' => $deck->utilisateur->id == $id
             ]);
 
@@ -479,11 +474,11 @@ class ProfileController extends Controller
     /**
      * Récupère toutes les parties associées à un utilisateur
      *
-     * @param int $id Id de l'utilisateur dont on veut les parties
+     * @param string $id Id de l'utilisateur dont on veut les parties
      *
      * @return PartieCollection Toutes les parties auquelles l'utilisateur est associé
      */
-    public function indexPartie(int $id): PartieCollection
+    public function indexPartie(string $id): PartieCollection
     {
         $decks = Deck::where('utilisateur_id', $id);
         $partiesDecksUtilisateur = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->where('validee', true)->where('refusee', false)->get();
@@ -511,12 +506,12 @@ class ProfileController extends Controller
     /**
      * Récupère une partie
      *
-     * @param int $id Id de l'utilisateur qui a fait la requête
+     * @param string $id Id de l'utilisateur qui a fait la requête
      * @param int $partieId Id de la partie à récupérer
      *
      * @return PartieResource Partie trouvée
      */
-    public function showPartie(int $id, int $partieId): PartieResource {
+    public function showPartie(string $id, int $partieId): PartieResource {
         $partie = Partie::find($partieId);
 
         if ($partie == null) {
@@ -539,11 +534,12 @@ class ProfileController extends Controller
     /**
      * Récupère les parties associées à un utilisateur qui n'ont pas encore été acceptées
      *
-     * @param int $id id de l'utilisateur
+     * @param string $id id de l'utilisateur
      *
      * @return PartieCollection la liste des parties pas encore acceptée / refusée
      */
-    public function notificationInvitationPartie(int $id) {
+    public function notificationInvitationPartie(string $id) {
+        // TODO verification que le user qui repond est celui auth
         $decks = Deck::where('utilisateur_id', $id)->get();
 
         $invitationsParties = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->where('validee', false)->get();
@@ -572,13 +568,14 @@ class ProfileController extends Controller
      * Update l'invitation à une partie avec la réponse (acceptée ou non) et update les statistiques utilisateurs et decks
      * nécessaire selon la réponse.
      *
-     * @param int $id id de l'utilisateur qui reçoit l'invitation
-     * @param int $invitationId id de l'invitation (PartieDeck)
+     * @param string $id id de l'utilisateur qui reçoit l'invitation
+     * @param string $invitationId id de l'invitation (PartieDeck)
      * @param Request $request request contenant la réponse (acceptee)
      *
      * @return JsonResponse
      */
-    public function acceptationInvitationPartie(int $id, int $invitationId, Request $request) {
+    public function acceptationInvitationPartie(string $id, string $invitationId, Request $request) {
+        // TODO valider que le user a qui l'invitation est envoyer est celui qui est login
         $request->validate(['invitation_acceptee' =>  ['required', 'boolean']]);
 
         $partieDeck = PartieDeck::findorfail($invitationId);
@@ -604,10 +601,10 @@ class ProfileController extends Controller
     /**
      * Supprime un deck (l'anonymise)
      *
-     * @param int $id id du deck à supprimer
+     * @param string $id id du deck à supprimer
      * @return JsonResponse information du deck avant son anonymisation
      */
-    public function deleteDeck(int $id, int $deckId): JsonResponse {
+    public function deleteDeck(string $id, string $deckId): JsonResponse {
         $deck = Deck::findOrFail($deckId);
 
         $deck->update(['supprime' => 1]);
