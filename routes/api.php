@@ -37,6 +37,8 @@ Route::prefix('utilisateurs')
         Route::get('/{id}/decks/{deckId}', [ProfileController::class, 'showDeck']);
         // Route pour supprimer un deck
         Route::delete('/{id}/decks/{deckId}', [ProfileController::class, 'deleteDeck']);
+        // Route pour l'ajout de deck manuel
+        Route::post('/{id}/decks', [ProfileController::class, 'ajouterDeckManuel']);
 
         // Route pour ajouter une partie
         Route::post('/{id}/parties', [ProfileController::class, 'storePartie']);

@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AjoutDeckRequest;
 use App\Http\Requests\PartieRequest;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Resources\PartieCollection;
 use App\Http\Resources\PartieResource;
 use App\Http\Resources\UtilisateurCollection;
 use App\Http\Resources\UtilisateurResource;
+use App\Logique\CreationDeck;
 use App\Logique\LogiqueUtilisateur;
 use App\Models\Deck;
 use App\Models\Partie;
@@ -21,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
+use mysql_xdevapi\Exception;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 
 /**
@@ -279,6 +282,27 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Ajout d'un deck manuel
+     *
+     * @param AjoutDeckRequest $request
+     * @param $id
+     * @return JsonResponse
+     */
+    public function ajouterDeckManuel(AjoutDeckRequest $request, $id) : JsonResponse
+    {
+        $data = $request->validated();
+        $data['utilisateur_id'] = (int)$id;
+
+        try {
+            $deck = CreationDeck::creerDeck($data, $id);
+        } catch (\Exception $error) {
+            return response()->json([$error->getMessage()], 422);
+        }
+
+        return response()->json([$deck], 201);
     }
 
     /**

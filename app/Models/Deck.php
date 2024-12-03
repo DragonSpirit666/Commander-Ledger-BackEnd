@@ -24,7 +24,7 @@ class Deck extends Model
         'supprime',
         'utilisateur_id',
         'pourcentage_cartes_bleues',
-        'pourcentage_cartes_jaunes',
+        'pourcentage_cartes_sans_couleur',
         'pourcentage_cartes_rouges',
         'pourcentage_cartes_noires',
         'pourcentage_cartes_vertes',
