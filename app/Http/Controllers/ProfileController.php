@@ -410,22 +410,6 @@ class ProfileController extends Controller
         $decksEntres = [];
         $positionsEntres = [];
 
-        // Ne peut pas vérifier les doublons avec des requests validation
-        foreach ($request->participants as $participant) {
-            if (in_array($participant['deck_id'], $decksEntres)) {
-                return response()->json(['message' => 'Le deck \''.$participant['deck_id'].'\' ne peut participer en double dans la partie.'], 422);
-            }
-
-            $decksEntres[] = $participant['deck_id'];
-
-            if (in_array($participant['position'], $positionsEntres)) {
-                return response()->json(['message' => 'Deux participants ne peuvent avoir terminé à la position '.$participant['position'].'.'], 422);
-            }
-
-            $positionsEntres[] = $participant['position'];
-        }
-
-
         $listeParticipants = $request->get('participants');
         $nbParticippants = count($listeParticipants);
 

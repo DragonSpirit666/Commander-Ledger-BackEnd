@@ -72,10 +72,12 @@ class Utilisateur extends Authenticatable
 
     public function amisAccepter()
     {
-        $amisDemandeur = $this->EnvoiDemandeAmi()->where('invitation_accepter', true)->get();
-        $amisReceveur = $this->RecevoirDemandeAmi()->where('invitation_accepter', true)->get();
-
-        $amis = $amisDemandeur->merge($amisReceveur)->unique('id');;
+        $amis = Ami::where(function ($query) {
+                $query->where('utilisateur_receveur_id', $this->id)
+                    ->orWhere('utilisateur_demandeur_id', $this->id);
+            })
+            ->where('invitation_accepter', true)
+            ->get();
 
         return $amis;
     }

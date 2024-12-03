@@ -81,8 +81,6 @@ describe('Test la route pour créer une partie', function () {
             "date" => date('y-m-d'),
             "participants" => [
                 ["deck_id" => Deck::get()[0]->id, "position" => 1],
-<<<<<<< HEAD
-=======
                 ["deck_id" => Deck::get()[1]->id, "position" => 2],
             ],
         ];
@@ -97,7 +95,6 @@ describe('Test la route pour créer une partie', function () {
             "date" => date('Y/m/d'),
             "participants" => [
                 ["deck_id" => Deck::get()[0]->id, "position" => 0],
->>>>>>> develop
                 ["deck_id" => Deck::get()[1]->id, "position" => 2],
             ],
         ];
@@ -148,8 +145,6 @@ describe('Test la route pour créer une partie', function () {
         $this->assertEquals($nbParties, Partie::count());
         $this->assertEquals($nbPartiesDecks, PartieDeck::count());
     });
-<<<<<<< HEAD
-=======
 
     it("Doit avoir entre 2 et 8 participants", function () {
         $this->refreshDatabase();
@@ -192,7 +187,6 @@ describe('Test la route pour créer une partie', function () {
         $this->assertEquals($nbParties, Partie::count());
         $this->assertEquals($nbPartiesDecks, PartieDeck::count());
     });
->>>>>>> develop
 });
 
 describe('Test la route pour get les parties d\'un utilisateur', function () {
