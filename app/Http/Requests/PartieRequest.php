@@ -23,10 +23,13 @@ class PartieRequest extends FormRequest
     {
         return [
             'date' => ['required', 'date', 'date_format:Y/m/d'],
-            'terminee' => ['boolean'],
-            'participants' => ['required', 'array'],
+            'participants' => ['required', 'array', 'min:2', 'max:8'],
             'participants.*.deck_id' => ['required', 'integer', 'exists:decks,id'],
+<<<<<<< HEAD
             'participants.*.position' => ['required', 'nullable', 'integer'],
+=======
+            'participants.*.position' => ['required', 'integer'],
+>>>>>>> develop
         ];
     }
 }
