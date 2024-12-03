@@ -11,6 +11,7 @@ uses(RefreshDatabase::class);
 
 describe('Test la route pour créer une partie', function () {
     it('peut créer une partie', function () {
+        $this->refreshDatabase();
         $this->seed();
         $nbParties = Partie::count();
         $nbPartiesDecks = PartieDeck::count();
@@ -21,7 +22,7 @@ describe('Test la route pour créer une partie', function () {
         $partieInfo = [
             "date" => date('Y/m/d'),
             "participants" => [
-                ["deck_id" => Deck::get()[0]->id],
+                ["deck_id" => Deck::get()[0]->id, "position" => 1],
                 ["deck_id" => Deck::get()[1]->id, "position" => 2],
             ],
         ];
@@ -34,6 +35,7 @@ describe('Test la route pour créer une partie', function () {
     });
 
     it('necessite d\'être authentifié', function () {
+        $this->refreshDatabase();
         $this->seed();
         $nbParties = Partie::count();
         $nbPartiesDecks = PartieDeck::count();
@@ -42,7 +44,7 @@ describe('Test la route pour créer une partie', function () {
         $partieInfo = [
             "date" => date('Y/m/d'),
             "participants" => [
-                ["deck_id" => Deck::get()[0]->id],
+                ["deck_id" => Deck::get()[0]->id, "position" => 1],
                 ["deck_id" => Deck::get()[1]->id, "position" => 2],
             ],
         ];
@@ -54,6 +56,7 @@ describe('Test la route pour créer une partie', function () {
     });
 
     it('retourne un erreur 422 si un champ n\'est pas présent ou valide', function () {
+        $this->refreshDatabase();
         $this->seed();
         $nbParties = Partie::count();
         $nbPartiesDecks = PartieDeck::count();
@@ -63,7 +66,7 @@ describe('Test la route pour créer une partie', function () {
 
         $partieInfo = [
             "participants" => [
-                ["deck_id" => Deck::get()[0]->id],
+                ["deck_id" => Deck::get()[0]->id, "position" => 1],
                 ["deck_id" => Deck::get()[1]->id, "position" => 2],
             ],
         ];
@@ -77,8 +80,48 @@ describe('Test la route pour créer une partie', function () {
         $partieInfo = [
             "date" => date('y-m-d'),
             "participants" => [
-                ["deck_id" => Deck::get()[0]->id],
+                ["deck_id" => Deck::get()[0]->id, "position" => 1],
                 ["deck_id" => Deck::get()[1]->id, "position" => 2],
+            ],
+        ];
+
+        $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
+
+        $response->assertStatus(422);
+        $this->assertEquals($nbParties, Partie::count());
+        $this->assertEquals($nbPartiesDecks, PartieDeck::count());
+    });
+
+    it("Ne peut créer une partie avec des positions ou des decks en double", function () {
+        $this->refreshDatabase();
+        $this->seed();
+
+        $nbParties = Partie::count();
+        $nbPartiesDecks = PartieDeck::count();
+        $utilisateur = Utilisateur::get()[0];
+
+        $this->actingAs($utilisateur);
+
+        $deck = Deck::get()[0];
+        $partieInfo = [
+            "date" => date('Y/m/d'),
+            "participants" => [
+                ["deck_id" => $deck->id, "position" => 1],
+                ["deck_id" => $deck->id, "position" => 2],
+            ],
+        ];
+
+        $response = $this->postJson('/commander-ledger/utilisateurs/'.$utilisateur->id.'/parties', $partieInfo);
+
+        $response->assertStatus(422);
+        $this->assertEquals($nbParties, Partie::count());
+        $this->assertEquals($nbPartiesDecks, PartieDeck::count());
+
+        $partieInfo = [
+            "date" => date('Y/m/d'),
+            "participants" => [
+                ["deck_id" => Deck::get()[0]->id, "position" => 1],
+                ["deck_id" => Deck::get()[1]->id, "position" => 1],
             ],
         ];
 
@@ -92,6 +135,7 @@ describe('Test la route pour créer une partie', function () {
 
 describe('Test la route pour get les parties d\'un utilisateur', function () {
     it('peut get les parties', function () {
+        $this->refreshDatabase();
         $this->seed();
         $utilisateur = Utilisateur::get()[0];
 
@@ -113,6 +157,7 @@ describe('Test la route pour get les parties d\'un utilisateur', function () {
 
 describe('Test la route pour get une partie', function () {
     it('peut get la partie', function () {
+        $this->refreshDatabase();
         $this->seed();
         $utilisateur = Utilisateur::get()[0];
         $partie = Partie::get()[0];
@@ -125,6 +170,7 @@ describe('Test la route pour get une partie', function () {
     });
 
     it('necessite d\'être authentifié', function () {
+        $this->refreshDatabase();
         $this->seed();
         $utilisateur = Utilisateur::get()[0];
         $partie = Partie::get()[0];
@@ -134,6 +180,7 @@ describe('Test la route pour get une partie', function () {
     });
 
     it('retourne 404 si la partie n\'existe pas', function () {
+        $this->refreshDatabase();
         $this->seed();
         $utilisateur = Utilisateur::get()[0];
 
@@ -146,6 +193,7 @@ describe('Test la route pour get une partie', function () {
 
 describe("Test la route pour get les invitations à des parties", function() {
    it("Peut récupérer les invitations non validées", function() {
+       $this->refreshDatabase();
        $this->seed();
 
        $utilisateur = Utilisateur::get()[0];
@@ -156,6 +204,7 @@ describe("Test la route pour get les invitations à des parties", function() {
    });
 
    it("Ne renvoit pas les parties validées", function() {
+       $this->refreshDatabase();
        $this->seed();
        $this->actingAs(Utilisateur::get()[0]);
 
@@ -174,6 +223,7 @@ describe("Test la route pour get les invitations à des parties", function() {
 
 describe("Test la route pour répondre à une invitation de partie", function() {
     test("Peut accetper une invitation", function() {
+        $this->refreshDatabase();
         $this->seed();
         $this->actingAs(Utilisateur::get()[0]);
 
@@ -197,6 +247,7 @@ describe("Test la route pour répondre à une invitation de partie", function() 
     });
 
     test("Peut refuser une invitation", function() {
+        $this->refreshDatabase();
         $this->seed();
         $this->actingAs(Utilisateur::get()[0]);
 
@@ -220,6 +271,7 @@ describe("Test la route pour répondre à une invitation de partie", function() 
     });
 
     test("Ne peut répondre à une invitation déjà validée", function() {
+        $this->refreshDatabase();
         $this->seed();
         $this->actingAs(Utilisateur::get()[0]);
 
@@ -244,6 +296,7 @@ describe("Test la route pour répondre à une invitation de partie", function() 
     });
 
     test("Le champ invitation_acceptee est requis", function() {
+        $this->refreshDatabase();
         $this->seed();
         $this->actingAs(Utilisateur::get()[0]);
 

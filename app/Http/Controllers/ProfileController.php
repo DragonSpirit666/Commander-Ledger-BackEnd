@@ -166,7 +166,9 @@ class ProfileController extends Controller
     {
         $requete->validate(['utilisateur_receveur_id' => ['required', 'int', 'exists:utilisateurs,id']]);
 
-        if ($id == $requete->utilisateur_receveur_id) {
+        $id_ami = $requete->utilisateur_receveur_id;
+
+        if ($id == $id_ami) {
             return response()->json(['message' => 'Tu ne peux pas envoyer une demande d\'ami à toi-même.'], 400);
         }
 
@@ -399,15 +401,30 @@ class ProfileController extends Controller
      * @param string $id Id de l'utilisateur qui créer la partie
      * @param PartieRequest $request Request avec les informations envoyées
      *
-     * @return PartieResource Information sur la partie créée
+     * @return JsonResponse Information sur la partie créée
      */
     public function storePartie(string $id, PartieRequest $request) : PartieResource
     {
-        // TODO devrait ajouter une validation qu'un position ne revient pas deux fois
-        // TODO devrait ajouter validation qu'un deck n'est pas la 2 fois
-        // TODO verifier qui a entre 2 et 8 players
-        // TODO changer le fait que la partie DOIT etre terminee
         $request->validated();
+
+        $decksEntres = [];
+        $positionsEntres = [];
+
+        // Ne peut pas vérifier les doublons avec des requests validation
+        foreach ($request->participants as $participant) {
+            if (in_array($participant['deck_id'], $decksEntres)) {
+                return response()->json(['message' => 'Le deck \''.$participant['deck_id'].'\' ne peut participer en double dans la partie.'], 422);
+            }
+
+            $decksEntres[] = $participant['deck_id'];
+
+            if (in_array($participant['position'], $positionsEntres)) {
+                return response()->json(['message' => 'Deux participants ne peuvent avoir terminé à la position '.$participant['position'].'.'], 422);
+            }
+
+            $positionsEntres[] = $participant['position'];
+        }
+
 
         $listeParticipants = $request->get('participants');
 
@@ -446,14 +463,16 @@ class ProfileController extends Controller
             }
         }
 
-        return new PartieResource([
-            'id' => $partie->id,
-            'date' => $partie->date,
-            'nb_participants' => $nbParticippants,
-            'terminee' => $terminee,
-            'createur_id' => $id,
-            'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
-            'participants' => $listePartiesDecks,
+        return response()->json(['data' =>
+            new PartieResource([
+                'id' => $partie->id,
+                'date' => $partie->date,
+                'nb_participants' => $nbParticippants,
+                'terminee' => $terminee,
+                'createur_id' => $id,
+                'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
+                'participants' => $listePartiesDecks,
+            ])
         ]);
     }
 
