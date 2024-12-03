@@ -571,14 +571,16 @@ class ProfileController extends Controller
 
         $partiesDecks = PartieDeck::where('partie_id', $partieId)->get();
 
-        return new PartieResource([
-            'id' => $partie->id,
-            'date' => $partie->date,
-            'nb_participants' => $partie->nb_participants,
-            'terminee' => $partie->terminee,
-            'createur_id' => $partie->createur->id,
-            'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
-            'participants' => $partiesDecks,
+        return response()->json([
+            'data' => new PartieResource([
+                'id' => $partie->id,
+                'date' => $partie->date,
+                'nb_participants' => $partie->nb_participants,
+                'terminee' => $partie->terminee,
+                'createur_id' => $partie->createur->id,
+                'gagnant_id' => $partie->gagnant ? $partie->gagnant->id : null,
+                'participants' => $partiesDecks,
+            ])
         ]);
     }
 
@@ -617,7 +619,9 @@ class ProfileController extends Controller
             ];
         }
 
-        return new PartieCollection($information);
+        return response()->json([
+            'data' => new PartieCollection($information)
+        ]);
     }
 
     /**
@@ -630,7 +634,7 @@ class ProfileController extends Controller
      *
      * @return JsonResponse
      */
-    public function acceptationInvitationPartie(string $id, string $invitationId, Request $request) {
+    public function acceptationInvitationPartie(string $id, string $invitationId, Request $request): JsonResponse {
         $utilisateur = Utilisateur::find($id);
         if ($utilisateur === null) {
             return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);

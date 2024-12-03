@@ -109,7 +109,7 @@ describe('Test les routes pour get des decks', function () {
 
         $response = $this->get("/commander-ledger/utilisateurs/{$utilisateur->id}/decks/abc");
 
-        $response->assertStatus(400);
+        $response->assertStatus(404);
     });
 });
 
