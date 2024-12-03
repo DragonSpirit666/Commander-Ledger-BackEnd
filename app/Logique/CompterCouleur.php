@@ -13,7 +13,7 @@ class CompterCouleur {
     public static function Compte(array $cartesDetails) : string
     {
         $statsCouleur = [
-            "nbBlaqnches" => 0,
+            "nbBlanches" => 0,
             "nbBleus" => 0,
             "nbSansCouleur" => 0,
             "nbRouges" => 0,
@@ -41,7 +41,7 @@ class CompterCouleur {
                         break;
 
                     case "W":
-                        $statsCouleur["nbBlaqnches"] += $cartes["quantité"];
+                        $statsCouleur["nbBlanches"] += $cartes["quantité"];
                         break;
 
                     default:

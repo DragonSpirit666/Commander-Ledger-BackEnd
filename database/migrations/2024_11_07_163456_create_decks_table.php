@@ -23,7 +23,7 @@ return new class extends Migration
             $table->double('pourcentage_utilisation');
             $table->bigInteger('utilisateur_id')->unsigned();
             $table->double('pourcentage_cartes_bleues')->default(0);
-            $table->double('pourcentage_cartes_sans_couleur')->default(0);
+            $table->double('pourcentage_cartes_jaunes')->default(0);
             $table->double('pourcentage_cartes_rouges')->default(0);
             $table->double('pourcentage_cartes_noires')->default(0);
             $table->double('pourcentage_cartes_vertes')->default(0);

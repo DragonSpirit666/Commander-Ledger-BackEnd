@@ -69,7 +69,7 @@ class CreationDeck
 
         foreach ($tauxCouleurs as $couleur => $prc) {
             switch ($couleur) {
-                case "Blaqnches":
+                case "Blanches":
                     $data["pourcentage_cartes_blanches"] = $prc;
                     break;
                 case "Bleus":
