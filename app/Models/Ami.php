@@ -17,6 +17,15 @@ class Ami extends Model
         'invitation_accepter',
     ];
 
+    /**
+     * Les attributs qui doivent être cachés lors de la sérialisation.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
 
     /**
      * * Relation avec l'utilisateur demandeur.

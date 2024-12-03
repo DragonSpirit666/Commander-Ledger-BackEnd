@@ -25,10 +25,11 @@ class RegisteredUserController extends Controller
         Auth::login($user);
 
         $token = $user->createToken('auth_token')->plainTextToken;
+        $utilisateur = Utilisateur::find($user->id);
 
         return [
             "data" => [
-                "utilisateur" => new UtilisateurResource($user),
+                "utilisateur" => new UtilisateurResource($utilisateur),
                 "token" => $token,
             ],
         ];
