@@ -195,7 +195,7 @@ class ProfileController extends Controller
 
         $utilisateurAmi = Utilisateur::find($id_ami);
         if ($utilisateurAmi === null) {
-            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+            return response()->json(['message' => 'L\'utilisateur \''.$id_ami.'\' n\'existe pas'], 404);
         }
 
         if ($id == $id_ami) {
@@ -332,13 +332,10 @@ class ProfileController extends Controller
      */
     public function indexDeck(string $id): JsonResponse
     {
-        if (!ctype_digit((string)$id)) {
-            return response()->json([
-                'message' => 'Bad Request',
-            ], 400);
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
         }
-
-        $utilisateur = Utilisateur::findOrFail($id);
 
         $decks = Deck::where('utilisateur_id', $utilisateur->id)->get();
 
@@ -362,20 +359,15 @@ class ProfileController extends Controller
      */
     public function showDeck(string $id, string $deckId): JsonResponse
     {
-        if (!ctype_digit((string)$id)) {
-            return response()->json([
-                'message' => 'Bad Request',
-            ], 400);
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
         }
 
-        if (!ctype_digit((string)$deckId)) {
-            return response()->json([
-                'message' => 'Bad Request',
-            ], 400);
+        $deck = Deck::find($deckId);
+        if ($deck === null) {
+            return response()->json(['message' => 'Le deck \''.$deckId.'\' n\'existe pas'], 404);
         }
-
-        $deck = Deck::where('id', (int)$deckId)
-            ->firstOrFail();
 
         $deck->nb_parties_gagnees = $this->CalculerDeckGagnees($deck->id);
         $deck->nb_parties_perdues = $this->CalculerDeckPerdu($deck->id);
@@ -448,6 +440,11 @@ class ProfileController extends Controller
      */
     public function storePartie(string $id, PartieRequest $request) : JsonResponse
     {
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
+
         $request->validated();
 
         $decksEntres = [];
@@ -519,10 +516,15 @@ class ProfileController extends Controller
      *
      * @param string $id Id de l'utilisateur dont on veut les parties
      *
-     * @return PartieCollection Toutes les parties auquelles l'utilisateur est associé
+     * @return JsonResponse Toutes les parties auquelles l'utilisateur est associé
      */
-    public function indexPartie(string $id): PartieCollection
+    public function indexPartie(string $id): JsonResponse
     {
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
+
         $decks = Deck::where('utilisateur_id', $id);
         $partiesDecksUtilisateur = PartieDeck::whereIn('deck_id', $decks->pluck('id'))->where('validee', true)->where('refusee', false)->get();
         $parties = Partie::find($partiesDecksUtilisateur->pluck('partie_id'));
@@ -543,7 +545,9 @@ class ProfileController extends Controller
             ];
         }
 
-        return new PartieCollection($information);
+        return response()->json([
+            'data' => new PartieCollection($information)
+        ]);
     }
 
     /**
@@ -554,11 +558,15 @@ class ProfileController extends Controller
      *
      * @return PartieResource Partie trouvée
      */
-    public function showPartie(string $id, int $partieId): PartieResource {
-        $partie = Partie::find($partieId);
+    public function showPartie(string $id, int $partieId): JsonResponse {
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
 
-        if ($partie == null) {
-            throw new NotFoundResourceException();
+        $partie = Partie::find($partieId);
+        if ($partie === null) {
+            return response()->json(['message' => 'La partie \''.$partieId.'\' n\'existe pas'], 404);
         }
 
         $partiesDecks = PartieDeck::where('partie_id', $partieId)->get();
@@ -581,7 +589,12 @@ class ProfileController extends Controller
      *
      * @return PartieCollection la liste des parties pas encore acceptée / refusée
      */
-    public function notificationInvitationPartie(string $id) {
+    public function notificationInvitationPartie(string $id): JsonResponse {
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
+
         // TODO verification que le user qui repond est celui auth
         $decks = Deck::where('utilisateur_id', $id)->get();
 
@@ -618,6 +631,11 @@ class ProfileController extends Controller
      * @return JsonResponse
      */
     public function acceptationInvitationPartie(string $id, string $invitationId, Request $request) {
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
+
         // TODO valider que le user a qui l'invitation est envoyer est celui qui est login
         $request->validate(['invitation_acceptee' =>  ['required', 'boolean']]);
 
@@ -648,7 +666,15 @@ class ProfileController extends Controller
      * @return JsonResponse information du deck avant son anonymisation
      */
     public function deleteDeck(string $id, string $deckId): JsonResponse {
-        $deck = Deck::findOrFail($deckId);
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
+
+        $deck = Deck::find($deckId);
+        if ($deck === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$deckId.'\' n\'existe pas'], 404);
+        }
 
         $deck->update(['supprime' => 1]);
         $deckNonModifie = $deck->replicate();
