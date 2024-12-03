@@ -53,7 +53,12 @@ class ProfileController extends Controller
      */
     public function showUtilisateur(string $id): JsonResponse
     {
-        $utilisateur = Utilisateur::findOrFail($id);
+        $utilisateur = Utilisateur::find($id);
+
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
+
         LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
         LogiqueUtilisateur::CalculerRatioPartiesGagneesUtilisateur($utilisateur);
 
@@ -78,9 +83,14 @@ class ProfileController extends Controller
             'prive' => 'required|boolean',
         ]);
 
+        $utilisateur = Utilisateur::find($id);
+
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
+
         $donneesValide['prive'] = filter_var($donneesValide['prive'], FILTER_VALIDATE_BOOLEAN);
 
-        $utilisateur = Utilisateur::findOrFail($id);
         $utilisateur->update($donneesValide);
 
         LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
@@ -99,7 +109,12 @@ class ProfileController extends Controller
      */
     public function destroyUtilisateur(string $id): JsonResponse
     {
-        $utilisateur = Utilisateur::findOrFail($id);
+        $utilisateur = Utilisateur::find($id);
+
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
+
         LogiqueUtilisateur::CalculerPrixTotalsDecksUtilisateur($utilisateur);
         LogiqueUtilisateur::CalculerRatioPartiesGagneesUtilisateur($utilisateur);
 
@@ -134,6 +149,11 @@ class ProfileController extends Controller
         // TODO valider que la demande a pas deja ete accepter
         $requete->validate(['invitation_acceptee' => ['required', 'boolean']]);
 
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
+
         $ami = Ami::find($id_ami);
 
         if (!$ami) {
@@ -167,6 +187,16 @@ class ProfileController extends Controller
     {
         $requete->validate(['utilisateur_receveur_id' => ['required', 'int', 'exists:utilisateurs,id']]);
         $id_ami = $requete->utilisateur_receveur_id;
+
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
+
+        $utilisateurAmi = Utilisateur::find($id_ami);
+        if ($utilisateurAmi === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
 
         if ($id == $id_ami) {
             return response()->json(['message' => 'Tu ne peux pas envoyer une demande d\'ami à toi-même.'], 400);
@@ -204,7 +234,10 @@ class ProfileController extends Controller
      */
     public function obtenirListeAmis(string $id): JsonResponse
     {
-        $utilisateur = Utilisateur::findOrFail($id);
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
 
         $amis = $utilisateur->amisAccepter();
 
@@ -220,6 +253,11 @@ class ProfileController extends Controller
      */
     public function notificationDemandeAmi(string $id): JsonResponse
     {
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
+
         $requete = Ami::where('utilisateur_receveur_id', $id)
         ->where('invitation_accepter', false)
         ->get();
@@ -252,6 +290,11 @@ class ProfileController extends Controller
      */
     public function EffacerAmitie(string $id, string $id_ami)
     {
+        $utilisateur = Utilisateur::find($id);
+        if ($utilisateur === null) {
+            return response()->json(['message' => 'L\'utilisateur \''.$id.'\' n\'existe pas'], 404);
+        }
+
         $ami = Ami::where('utilisateur_demandeur_id', $id)
             ->where('utilisateur_receveur_id', $id_ami)
             ->first();
