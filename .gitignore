@@ -21,7 +21,6 @@ dist/
 
 # Maven
 target/
-dist/
 
 # JetBrains IDE
 .idea/
@@ -47,4 +46,17 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+
+.env
+/vendor
+
+# Ignore Composer lock file
+composer.lock
+
+# Ignore NPM/Yarn lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+storage/certs
 
