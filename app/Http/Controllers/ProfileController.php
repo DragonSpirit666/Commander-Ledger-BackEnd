@@ -672,10 +672,6 @@ class ProfileController extends Controller
             return response()->json(['message' => 'Cette invitation n\'existe pas.'], 404);
         }
 
-        if ($partieDeck->deck->utilisateur->id != auth()->id()) {
-            return response()->json(['message' => 'Vous n\'êtes pas autorisé à répondre à cette invitation.'], 403);
-        }
-
         Utilisateur::findorfail($id);
 
         if ($request->invitation_acceptee == 1) {
