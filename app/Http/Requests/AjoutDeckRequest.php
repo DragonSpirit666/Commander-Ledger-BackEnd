@@ -25,9 +25,9 @@ class AjoutDeckRequest extends FormRequest
         return [
             'nom' => ['required', 'string'],
             'cartes' => ['required', 'string'],
-            'salt' => ['double'],
+            'salt' => ['decimal:0,2'],
             'photo' => ['string'],
-            'prix' => ['double']
+            'prix' => ['decimal:0,2']
         ];
     }
 }
