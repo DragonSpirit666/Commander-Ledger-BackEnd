@@ -1,5 +1,6 @@
 ### Repo original sur bitbucket j'ai changer l'origine pour l'importer sur git.
 ## Sur bitbucket les gitblames fonctionne diffiramant donc il ne sont pas tous correcte.
+La branche P2E2-43-pipeline-automatique-test-back-e est la branche ou j'ai tenter de set up un pipeline, mais le techno que le prof voulait que on utilise fonctionnait pas avec laravel, il a donc désider que pour le cours il n'étais pas nécessaire de continuer
 
 # Guide d'utilisation
 ## Pour pouvoir utiliser sail :
