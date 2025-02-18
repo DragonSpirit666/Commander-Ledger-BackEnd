@@ -1,3 +1,6 @@
+### Repo original sur bitbucket j'ai changer l'origine pour l'importer sur git.
+## Sur bitbucket les gitblames fonctionne diffiramant donc il ne sont pas tous correcte.
+
 # Guide d'utilisation
 ## Pour pouvoir utiliser sail :
 - ouvrir ~./bashrc
